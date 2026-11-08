@@ -1,0 +1,979 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#FFFFFF">
+<title>Tests de agua · Club Náutico</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<style>
+/* Tests de agua del Club Náutico. Pantalla de trabajo junto a la piscina, al sol:
+   fondo claro, tinta casi negra, el azul del club solo en las acciones del cronómetro y en los tiempos.
+   Cuadrícula: una columna de 720px como máximo, márgenes de 16px en el teléfono, separación única de 12px. */
+:root{
+  --ground:#F4F6FB;--surface:#FFFFFF;--raised:#EDF0F7;--active:#E4E9F4;
+  --border:#DDE2EC;--rule:#ECEFF5;--control:#C3CBDA;
+  --text:#0E1626;--muted:#4D586C;--faint:#5E687B;
+  --accent:#22409A;--accent-ink:#1C3480;--accent-soft:#EDF1FC;--accent-track:#D3DCF5;
+  --amber:#FFC93C;
+  --positive:#1F6E45;--pill-positive-bg:#DCF5E5;--pill-positive-ink:#0B3A20;
+  --negative:#B42318;--pill-negative-bg:#FDEBE8;--pill-negative-ink:#7A1A12;
+  --pill-warning-bg:#FFF6D9;--pill-warning-ink:#7A4A00;--warning-line:#F2D27A;
+  --radius-card:8px;--radius-control:6px;
+  --gap:12px;--pad:16px;
+  --font:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--text);font:16px/1.45 var(--font);font-variant-numeric:tabular-nums;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1{font-size:24px;line-height:1.2;font-weight:700;margin:0;letter-spacing:-.01em}
+h2{font-size:17px;line-height:1.3;font-weight:600;margin:0}
+p{margin:0}
+.num{font-variant-numeric:tabular-nums}
+
+/* barra superior */
+.barra{position:sticky;top:0;z-index:6;background:var(--surface);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top,0px)}
+.barra-in{max-width:720px;margin:0 auto;height:52px;display:flex;align-items:center;gap:10px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
+.marca{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;min-width:0}
+.marca svg{flex:none}
+.marca span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.volver{flex:none;width:44px;height:44px;margin-left:-10px;border:0;background:transparent;border-radius:var(--radius-control);display:grid;place-items:center}
+.volver:active{background:var(--raised)}
+.sync{margin-left:auto;flex:none;font-size:13px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--pill-positive-bg);color:var(--pill-positive-ink);white-space:nowrap}
+.sync.env{background:var(--accent-soft);color:var(--accent-ink)}
+.sync.cola{background:var(--pill-warning-bg);color:var(--pill-warning-ink)}
+.sync.mal{background:var(--pill-negative-bg);color:var(--pill-negative-ink)}
+
+.lienzo{max-width:720px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:var(--gap)}
+.lienzo>*{min-width:0}
+.titulo{display:grid;gap:4px;padding:4px 0 4px}
+.titulo .sub{color:var(--muted);font-size:15px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--pad);display:grid;gap:12px}
+.panel h2+p{color:var(--muted);font-size:14px;margin-top:-6px}
+label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
+.campo input,.campo textarea{width:100%;min-height:48px;border:1px solid var(--control);border-radius:var(--radius-control);background:var(--surface);padding:8px 12px;font-size:17px;font-weight:500}
+.campo textarea{min-height:76px;resize:vertical;font-size:16px}
+.campo input::placeholder,.campo textarea::placeholder{color:var(--faint);font-weight:400}
+.campo input:focus,.campo textarea:focus{outline:3px solid var(--accent-track);border-color:var(--accent)}
+.campo input.mal{border-color:var(--negative);background:var(--pill-negative-bg)}
+.ayuda{font-size:13px;color:var(--muted);font-weight:400}
+.error{color:var(--negative);font-weight:600;font-size:14px}
+.fila{display:flex;align-items:center;gap:10px}
+.fila>*{min-width:0}
+
+/* botones: un relleno azul por pantalla para la tarea principal */
+.btn{min-height:48px;border-radius:var(--radius-control);border:1px solid var(--control);background:var(--surface);padding:8px 16px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn:active{background:var(--raised)}
+.btn.prim{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
+.btn.prim:active{background:var(--accent-ink)}
+.btn.texto{border-color:transparent;background:transparent;color:var(--accent);padding-inline:6px;min-height:44px}
+.btn.texto:active{background:var(--accent-soft)}
+.btn.peligro{color:var(--negative)}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.ancho{width:100%}
+.acciones{display:flex;gap:10px;flex-wrap:wrap}
+.acciones .btn{flex:1 1 140px}
+
+/* inicio */
+.id-grande{font-size:26px;font-weight:700;letter-spacing:.01em;color:var(--accent-ink);overflow-wrap:anywhere}
+.reciente{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;padding:8px 0}
+.reciente:first-of-type{border-top:0}
+.reciente b{display:block;font-weight:600}
+.reciente small{display:block;color:var(--muted);font-size:13px}
+.reciente svg{margin-left:auto;flex:none;color:var(--muted)}
+
+/* lista de series */
+.pill{display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--raised);color:var(--muted);white-space:nowrap}
+.pill.ok{background:var(--pill-positive-bg);color:var(--pill-positive-ink)}
+.pill.aviso{background:var(--pill-warning-bg);color:var(--pill-warning-ink)}
+.pill.mal{background:var(--pill-negative-bg);color:var(--pill-negative-ink)}
+.resumen{display:flex;flex-wrap:wrap;gap:6px 16px;color:var(--muted);font-size:14px}
+.resumen b{color:var(--text);font-weight:600}
+.series{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden}
+.serie-f{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;width:100%;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;padding:12px var(--pad);min-height:64px}
+.serie-f:first-child{border-top:0}
+.serie-f:active{background:var(--raised)}
+.serie-f .q{font-weight:600}
+.serie-f .q span{color:var(--muted);font-weight:500}
+.serie-f .quienes{grid-column:1;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.serie-f .cuantos{grid-row:1/3;grid-column:2;text-align:right;font-size:14px;color:var(--muted)}
+.serie-f .cuantos b{display:block;font-size:17px;color:var(--text)}
+.vacio{border:1px dashed var(--control);border-radius:var(--radius-card);padding:16px;color:var(--muted);font-size:15px}
+.aviso-caja{background:var(--pill-warning-bg);border:1px solid var(--warning-line);color:var(--pill-warning-ink);border-radius:var(--radius-card);padding:12px 14px;font-size:14px;font-weight:500;display:grid;gap:10px}
+
+/* armar serie */
+.grupo-op{display:grid;gap:8px}
+.grupo-op>span{font-size:14px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{min-height:44px;min-width:52px;padding:6px 14px;border-radius:var(--radius-control);border:1px solid var(--control);background:var(--surface);font-weight:600;font-size:15px}
+.chips button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);box-shadow:inset 0 0 0 1px var(--accent)}
+.chips button:disabled{opacity:.45}
+.carril-f{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;padding:6px 0}
+.carril-f:first-child{border-top:0}
+.carril-f .n{flex:none;width:36px;height:36px;border-radius:var(--radius-control);background:var(--raised);display:grid;place-items:center;font-weight:700}
+.carril-f .quien{flex:1;min-width:0}
+.carril-f .quien b{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.carril-f .quien small{display:block;color:var(--muted);font-size:13px}
+.carril-f .elige{color:var(--accent);font-weight:600}
+
+/* hojas (selector de nadador y detalle de carril) */
+.hoja{position:fixed;inset:0;z-index:20;background:var(--ground);overflow:auto;-webkit-overflow-scrolling:touch}
+.hoja .barra{position:sticky}
+.lista-nad{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden}
+.nad{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;padding:8px var(--pad)}
+.nad:first-child{border-top:0}
+.nad:active{background:var(--raised)}
+.nad b{display:block;font-weight:600}
+.nad small{display:block;color:var(--muted);font-size:13px}
+.nad .ya{margin-left:auto;flex:none}
+.buscar{position:sticky;top:53px;z-index:4;background:var(--ground);padding:12px 0 8px;display:grid;gap:10px}
+.chips.desliza{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+.chips.desliza::-webkit-scrollbar{display:none}
+.chips.desliza button{flex:none}
+
+/* cronómetro */
+.reloj{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:12px var(--pad);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px}
+.reloj .t{font-size:clamp(28px,9.2vw,44px);line-height:1;font-weight:700;letter-spacing:-.02em;color:var(--text);white-space:nowrap}
+.reloj.corre .t{color:var(--accent-ink)}
+.reloj .que{grid-column:1/-1;display:flex;align-items:center;gap:8px;min-height:36px;color:var(--muted);font-size:14px}
+.reloj .que span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reloj .que.msg span{color:var(--text);font-weight:600}
+.reloj .que button{flex:none;min-height:36px;padding:0 12px;border-radius:var(--radius-control);border:1px solid var(--control);background:var(--surface);color:var(--accent);font-weight:700}
+.salida{min-width:112px;min-height:60px;font-size:19px;font-weight:700;border-radius:var(--radius-control);border:0;background:var(--accent);color:#FFFFFF;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.salida:active{background:var(--accent-ink)}
+.salida.sec{background:var(--surface);color:var(--negative);border:1px solid var(--control);font-size:15px;font-weight:600;min-height:48px}
+.salida.sec.arma{background:var(--pill-negative-bg);border-color:var(--negative)}
+.mis{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+.mis>span{white-space:nowrap}
+.mis .chips{gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+.mis .chips button{min-width:44px;min-height:40px;padding:4px 8px;font-size:15px}
+.carriles{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden}
+.ln{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:4px 10px;padding:8px 12px;border-top:1px solid var(--rule);min-height:72px}
+.ln:first-child{border-top:0}
+.ln .n{width:32px;height:32px;border-radius:var(--radius-control);background:var(--raised);display:grid;place-items:center;font-weight:700;font-size:17px}
+.ln.corre .n{background:var(--accent);color:#FFFFFF}
+.ln .info{min-width:0;border:0;background:transparent;text-align:left;padding:4px 0;display:grid;gap:3px}
+.ln .info b{font-weight:600;font-size:16px;line-height:1.2;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+.ln .info small{color:var(--muted);font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ln .info small em{font-style:normal;color:var(--text);font-weight:600}
+.pista{display:flex;gap:3px;height:6px}
+.pista i{flex:1;border-radius:2px;background:var(--accent-track)}
+.pista i.on{background:var(--accent)}
+.ln .bts{display:flex;gap:8px}
+.ln .bts button{min-height:56px;border-radius:var(--radius-control);font-weight:700;font-size:16px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.b-pase{min-width:72px;border:2px solid var(--accent);background:var(--surface);color:var(--accent-ink)}
+.b-pase:active{background:var(--accent-soft)}
+.b-parar{min-width:80px;border:0;background:var(--accent);color:#FFFFFF}
+.b-parar:active{background:var(--accent-ink)}
+.b-parar.solo{min-width:120px}
+.b-hueco{min-width:72px}
+.ln .final{text-align:right;border:0;background:transparent;padding:4px 0 4px 8px;min-height:56px}
+.ln .final b{display:block;font-size:22px;font-weight:700;color:var(--accent-ink)}
+.ln .final small{color:var(--accent);font-weight:600;font-size:13px}
+.ln.ajeno{min-height:52px;color:var(--muted)}
+.ln.ajeno .n{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.ln.ajeno .info b{font-weight:500;color:var(--muted)}
+.pulso{color:var(--pill-warning-ink);background:var(--pill-warning-bg);border-radius:4px;padding:0 6px;font-weight:600}
+.pulso.ya{color:var(--pill-negative-ink);background:var(--pill-negative-bg)}
+.compacto{gap:8px}
+.compacto .titulo{padding:0}
+.compacto .titulo h1{font-size:20px}
+.compacto .titulo .sub{display:none}
+.compacto .reloj{padding:8px 12px;gap:4px 12px}
+.compacto .ln{min-height:52px;padding:3px 10px}
+.compacto .ln .info{padding:2px 0;gap:1px}
+.compacto .ln .info b{-webkit-line-clamp:1}
+.compacto .pista{display:none}
+.compacto .ln .bts button,.compacto .ln .final{min-height:46px}
+.compacto .reloj .t{font-size:clamp(26px,8.6vw,38px)}
+.compacto .salida{min-height:50px}
+.compacto .mis .chips button{min-width:38px;min-height:38px}
+
+/* detalle de un carril */
+.tiempos{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px}
+.tiempos .campo input{text-align:center;font-size:20px;font-weight:700}
+.tiempos .par{font-size:13px;color:var(--muted);text-align:center;font-weight:400}
+.final-campo input{background:var(--accent-soft);border-color:var(--accent)}
+.toggle{display:flex;align-items:center;gap:12px;min-height:48px;font-weight:600}
+.toggle input{width:24px;height:24px;accent-color:var(--accent)}
+
+/* aviso flotante con deshacer */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--text);color:#FFFFFF;border-radius:var(--radius-card);padding:6px 6px 6px 14px;display:flex;align-items:center;gap:8px;font-weight:500;font-size:15px;width:max-content;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(14,22,38,.22)}
+.toast span{padding:8px 0}
+.toast button{border:0;background:transparent;color:var(--amber);font-weight:700;min-height:40px;padding:0 10px;border-radius:var(--radius-control)}
+
+@media (min-width:700px){
+  .lienzo{padding-top:24px;gap:16px}
+  .doble{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  .reloj .t{font-size:46px}
+}
+</style>
+</head>
+<body>
+<header class="barra" id="barra"><div class="barra-in">
+  <button class="volver" id="btn-volver" type="button" aria-label="Volver" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+  <div class="marca"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#22409A"/><path d="M5 9h16M5 13h16M5 17h16" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2.2 2.2"/><circle cx="9" cy="9" r="1.8" fill="#FFC93C"/><circle cx="17" cy="13" r="1.8" fill="#FFC93C"/><circle cx="12" cy="17" r="1.8" fill="#FFC93C"/></svg><span id="t-barra">Tests de agua</span></div>
+  <span class="sync" id="sync" role="status" hidden>Guardado</span>
+</div></header>
+
+<!-- ================= INICIO ================= -->
+<main class="lienzo" id="v-inicio" hidden>
+  <div class="titulo"><h1>Tests de agua</h1><p class="sub">Club Náutico · Toma de tiempos, pases y pulso en la piscina</p></div>
+  <div class="doble">
+    <form class="panel" id="f-entrar" autocomplete="off" novalidate>
+      <h2>Entrar a un test</h2>
+      <p>Escribe el ID que te pasó el profesor.</p>
+      <label class="campo" for="e-nombre">Tu nombre<input id="e-nombre" maxlength="40" autocapitalize="words" required></label>
+      <label class="campo" for="e-id">ID del test<input id="e-id" maxlength="40" placeholder="2026-11-09-RICARDO-482" autocapitalize="characters" autocorrect="off" spellcheck="false" required></label>
+      <p class="error" id="e-error" role="alert" hidden></p>
+      <button class="btn prim ancho" id="e-btn" type="submit">Entrar</button>
+    </form>
+    <div class="panel" id="p-crear">
+      <form id="f-crear" autocomplete="off" novalidate style="display:grid;gap:12px">
+        <h2>Crear un test</h2>
+        <p>Se crea el ID con la fecha y el profesor. Las pruebas y series se arman en la piscina.</p>
+        <label class="campo" for="c-fecha">Fecha del test<input id="c-fecha" type="date" required></label>
+        <label class="campo" for="c-prof">Profesor que toma el test<input id="c-prof" maxlength="40" autocapitalize="words" required></label>
+        <label class="campo" for="c-clave">Contraseña del club<input id="c-clave" type="password" maxlength="40" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required></label>
+        <p class="error" id="c-error" role="alert" hidden></p>
+        <button class="btn ancho" id="c-btn" type="submit">Crear test</button>
+      </form>
+      <div id="c-listo" hidden style="display:grid;gap:12px">
+        <h2>Test creado</h2>
+        <p class="ayuda">Pásales este ID a quienes te ayuden a tomar tiempos.</p>
+        <p class="id-grande" id="c-id"></p>
+        <div class="acciones"><button class="btn" id="c-copiar" type="button">Copiar ID</button><button class="btn" id="c-compartir" type="button">Compartir</button></div>
+        <button class="btn prim ancho" id="c-empezar" type="button">Empezar el test</button>
+        <button class="btn texto" id="c-otro" type="button">Crear otro test</button>
+      </div>
+    </div>
+  </div>
+  <section class="panel" id="recientes" hidden>
+    <h2>Tests en este celular</h2>
+    <div id="l-recientes"></div>
+  </section>
+</main>
+
+<!-- ================= TEST ================= -->
+<main class="lienzo" id="v-test" hidden>
+  <div class="titulo"><h1 id="t-titulo"></h1><p class="sub" id="t-sub"></p></div>
+  <div class="resumen" id="t-resumen"></div>
+  <div class="aviso-caja" id="t-cerrado" hidden>
+    <p>Este test está cerrado. Para corregir algo, reábrelo con la contraseña del club.</p>
+    <div class="fila"><label class="campo" for="r-clave" style="flex:1">Contraseña del club<input id="r-clave" type="password" maxlength="40" autocomplete="off"></label></div>
+    <p class="error" id="r-error" hidden></p>
+    <button class="btn" id="r-btn" type="button">Reabrir test</button>
+  </div>
+  <button class="btn prim ancho" id="t-nueva" type="button">Nueva serie</button>
+  <div id="t-series"></div>
+  <div class="acciones">
+    <button class="btn" id="t-copiar" type="button">Copiar ID</button>
+    <button class="btn" id="t-cerrar" type="button">Cerrar test</button>
+  </div>
+  <button class="btn texto" id="t-salir" type="button"></button>
+</main>
+
+<!-- ================= ARMAR SERIE ================= -->
+<main class="lienzo" id="v-serie" hidden>
+  <div class="titulo"><h1 id="s-titulo">Nueva serie</h1><p class="sub" id="s-sub"></p></div>
+  <section class="panel">
+    <div class="grupo-op"><span>Prueba</span><div class="chips" id="s-prueba"></div></div>
+    <div class="grupo-op"><span>Estilo</span><div class="chips" id="s-estilo"></div></div>
+    <div class="grupo-op"><span>Pases</span><div class="chips" id="s-pases"></div><p class="ayuda" id="s-pases-ayuda"></p></div>
+    <div class="grupo-op"><span>Carriles</span><div class="chips" id="s-carriles"></div></div>
+  </section>
+  <section class="panel">
+    <div class="fila"><h2 style="flex:1">Nadadores</h2><button class="btn texto" id="s-limpiar" type="button">Vaciar carriles</button></div>
+    <div id="s-lanes"></div>
+  </section>
+  <button class="btn prim ancho" id="s-listo" type="button">Ir al cronómetro</button>
+  <button class="btn texto peligro" id="s-borrar" type="button" hidden>Eliminar esta serie</button>
+</main>
+
+<!-- ================= CRONÓMETRO ================= -->
+<main class="lienzo" id="v-crono" hidden>
+  <div class="titulo"><h1 id="k-titulo"></h1><p class="sub" id="k-sub"></p></div>
+  <section class="reloj" id="k-reloj" aria-label="Cronómetro de la serie">
+    <div class="t" id="k-t" aria-live="off">00:00.000</div>
+    <button class="salida" id="k-salida" type="button">Salida</button>
+    <div class="que"><span id="k-que" role="status"></span><button id="k-desh" type="button" hidden>Deshacer</button></div>
+  </section>
+  <div class="mis" id="k-mis"></div>
+  <section class="carriles" id="k-lanes" aria-label="Carriles"></section>
+  <div class="acciones" id="k-fin">
+    <button class="btn" id="k-editar" type="button">Editar serie</button>
+    <button class="btn" id="k-sig" type="button">Siguiente serie, mismos nadadores</button>
+  </div>
+</main>
+
+<!-- ================= HOJA: ELEGIR NADADOR ================= -->
+<section class="hoja" id="h-nad" hidden aria-label="Elegir nadador">
+  <header class="barra"><div class="barra-in">
+    <button class="volver" id="h-nad-cerrar" type="button" aria-label="Cerrar"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    <div class="marca"><span id="h-nad-t">Carril 1</span></div>
+  </div></header>
+  <div class="lienzo" style="padding-top:0">
+    <div class="buscar">
+      <label class="campo" for="h-q" style="font-weight:600">Buscar por parte del nombre<input id="h-q" type="search" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="rios, cornejo, hugo…"></label>
+      <div class="chips desliza" id="h-grupos"></div>
+    </div>
+    <div class="lista-nad" id="h-lista"></div>
+    <div id="h-extra" style="display:grid;gap:10px"></div>
+  </div>
+</section>
+
+<!-- ================= HOJA: DETALLE DE CARRIL ================= -->
+<section class="hoja" id="h-det" hidden aria-label="Detalle del carril">
+  <header class="barra"><div class="barra-in">
+    <button class="volver" id="h-det-cerrar" type="button" aria-label="Listo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="marca"><span id="h-det-t"></span></div>
+  </div></header>
+  <div class="lienzo" id="h-det-c"></div>
+</section>
+
+<div class="toast" id="toast" role="status" hidden><span id="toast-t"></span><button id="toast-b" type="button" hidden>Deshacer</button></div>
+
+<script src="config.js?v=1"></script>
+<script>
+'use strict';
+const API=(window.CONFIG&&window.CONFIG.api)||'';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
+const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+
+/* ---------- pruebas ---------- */
+const PRUEBAS={15:['Frente','Espalda','Pecho'],25:['Libre','Espalda','Pecho','Mariposa'],50:['Libre','Espalda','Pecho','Mariposa'],
+  100:['Libre','Espalda','Pecho','Mariposa','Combinado'],200:['Libre','Espalda','Pecho','Mariposa','Combinado'],400:['Libre','Combinado'],800:['Libre'],1000:['Libre']};
+const DISTS=[15,25,50,100,200,400,800,1000];
+const nombrePrueba=p=>p===15?'15 m salida':p+' m';
+const opPases=p=>[25,50,100,200].filter(i=>i<p&&p%i===0);
+const pasesDef=p=>{const o=opPases(p);if(!o.length)return 0;if(p<=100)return 25;if(p===200)return 50;return 100};
+const pasesDe=s=>{const a=[];if(s.pases)for(let m=s.pases;m<s.prueba;m+=s.pases)a.push(m);return a};
+const carrilesDef=p=>p>=400?8:4;
+const conPulso=s=>s.prueba>=400;
+
+/* ---------- tiempos ---------- */
+const csDe=ms=>Math.floor(ms/10);               // centésimas sin redondear hacia arriba
+function fmtCs(c){const p=n=>String(n).padStart(2,'0');const m=Math.floor(c/6000),s=Math.floor(c%6000/100),cc=c%100;return m?m+':'+p(s)+'.'+p(cc):s+'.'+p(cc)}
+const fmtT=ms=>ms==null?'':fmtCs(csDe(ms));
+function fmtMs(ms){const v=Math.max(0,Math.floor(ms)),m=Math.floor(v/60000),s=Math.floor(v%60000/1000),mi=v%1000;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(mi).padStart(3,'0')}
+function digitosATexto(d){if(d.length<=2)return d;const cc=d.slice(-2),r=d.slice(0,-2);if(r.length<=2)return r+'.'+cc;return r.slice(0,-2)+':'+r.slice(-2)+'.'+cc}
+function digitosAMs(d){if(d.length<3)return null;const cc=+d.slice(-2),r=d.slice(0,-2),s=+r.slice(-2),m=r.length>2?+r.slice(0,-2):0;if(s>59||m>59)return null;const t=(m*6000+s*100+cc)*10;return t>0?t:null}
+const msADigitos=ms=>ms==null?'':fmtCs(csDe(ms)).replace(/\D/g,'');   // 7:06.83 -> 70683, lo que se teclearía
+
+/* ---------- estado ---------- */
+let cfg=load('ta_cfg',{juez:'',id:'',vista:'inicio',sid:'',recientes:[]});
+let st=null;            // el test abierto: {id,test,series,filas,padron,pend:{s:[],f:[]}}
+let cro={};             // salidas de este celular: sid -> {p,d}
+let mis={};             // carriles que toma este celular: sid -> [c]
+let inflight=false,sinRed=false,tSave=null;
+const avisados={};      // carriles ajenos ya avisados
+const guardaCfg=()=>store('ta_cfg',cfg);
+const guardaSt=()=>{if(st){store('ta_t_'+st.id,st);store('ta_c_'+st.id,cro);store('ta_m_'+st.id,mis)}};
+function abreLocal(id){st=load('ta_t_'+id,null);cro=load('ta_c_'+id,{});mis=load('ta_m_'+id,{});return st}
+
+const kDe=(sid,c)=>sid+'|'+c;
+const filaNueva=(sid,c)=>({k:kDe(sid,c),sid,c,nid:'',nom:'',pend:false,ns:false,fin:null,pas:[],man:false,pul:{},obs:'',juez:'',ts:0});
+const fila=(sid,c)=>st.filas[kDe(sid,c)]||filaNueva(sid,c);
+const seriesVivas=()=>Object.values(st.series).filter(s=>!s.borrada).sort((a,b)=>a.n-b.n);
+const lanesDe=s=>{const r=[];for(let c=1;c<=s.carriles;c++)r.push(fila(s.sid,c));return r};
+const ocupados=s=>lanesDe(s).filter(f=>f.nid||f.nom);
+const misCarriles=s=>mis[s.sid]||Array.from({length:s.carriles},(_,i)=>i+1);
+const esMio=(s,c)=>misCarriles(s).includes(c);
+const cerrado=()=>st&&st.test&&st.test.estado==='Cerrado';
+const nadador=id=>st.padron.find(n=>n.id===id);
+// Nombre corto para las filas del cronómetro; conserva lo que distingue a homónimos: "Hugo E. (papá)".
+const corto=f=>{if(!f.nom)return '';const ex=(f.nom.match(/\(.*\)/)||[''])[0],p=f.nom.replace(/\(.*\)/,'').trim().split(/\s+/);return (p.length>1?p[0]+' '+p[1].charAt(0)+'.':p[0])+(ex?' '+ex:'')};
+
+function toca(sid,c,cambio,rapido){
+  const f=JSON.parse(JSON.stringify(fila(sid,c)));
+  cambio(f);f.juez=cfg.juez;f.ts=Date.now();
+  st.filas[f.k]=f;if(!st.pend.f.includes(f.k))st.pend.f.push(f.k);
+  guardaSt();pintaSync();programa(rapido?250:700);
+}
+function tocaSerie(s){
+  s.juez=cfg.juez;s.ts=Date.now();st.series[s.sid]=s;
+  if(!st.pend.s.includes(s.sid))st.pend.s.push(s.sid);
+  guardaSt();pintaSync();programa(500);
+}
+function programa(ms){clearTimeout(tSave);tSave=setTimeout(enviar,ms)}
+
+// Intento: por nadador, prueba y estilo, en el orden de las series.
+function intentos(){
+  const r={},cuenta={};
+  seriesVivas().forEach(s=>lanesDe(s).forEach(f=>{
+    if(!f.fin||f.ns||!(f.nid||f.nom))return;
+    const q=(f.nid||f.nom)+'|'+s.prueba+'|'+s.estilo;cuenta[q]=(cuenta[q]||0)+1;r[f.k]=cuenta[q];
+  }));
+  return r;
+}
+
+/* ---------- red ---------- */
+async function llamar(cuerpo){
+  if(!API)throw new Error('sin api');
+  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),30000);
+  try{
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(cuerpo),signal:ctl.signal,redirect:'follow'});
+    return await r.json();
+  }finally{clearTimeout(to)}
+}
+function aplicar(r){
+  if(!r||!st)return;
+  if(r.test)st.test=r.test;
+  if(r.padron&&r.padron.length)st.padron=r.padron;
+  (r.series||[]).forEach(s=>{
+    if(st.pend.s.includes(s.sid))return;
+    const lo=st.series[s.sid];if(lo&&lo.ts>=s.ts)return;
+    st.series[s.sid]=s;
+  });
+  const choques=[];
+  (r.filas||[]).forEach(f=>{
+    if(st.pend.f.includes(f.k))return;
+    const lo=st.filas[f.k];if(lo&&lo.ts>=f.ts)return;
+    const s=st.series[f.sid];
+    if(s&&f.juez&&f.juez!==cfg.juez&&esMio(s,f.c)&&(f.fin||f.pas.some(Boolean))&&cro[f.sid]&&!avisados[f.k]){avisados[f.k]=1;choques.push('Carril '+f.c+': '+f.juez+' también le tomó tiempo. Quedó el último registro.')}
+    st.filas[f.k]=f;
+  });
+  guardaSt();
+  if(choques.length)aviso(choques[0]);
+  repinta();
+}
+async function enviar(){
+  if(!st||inflight)return;
+  if(!API){st.pend={s:[],f:[]};guardaSt();pintaSync();return}
+  const S=st.pend.s.slice(),F=st.pend.f.slice();
+  if(!S.length&&!F.length)return;
+  const snapS={},snapF={};
+  const series=S.map(k=>{snapS[k]=st.series[k].ts;return st.series[k]});
+  const filas=F.map(k=>{snapF[k]=st.filas[k].ts;return st.filas[k]});
+  inflight=true;pintaSync();
+  let otraVez=false;
+  try{
+    const r=await llamar({accion:'guardar',id:st.id,juez:cfg.juez,series,filas});
+    if(r.ok){
+      sinRed=false;
+      st.pend.s=st.pend.s.filter(k=>st.series[k].ts!==snapS[k]);
+      st.pend.f=st.pend.f.filter(k=>st.filas[k].ts!==snapF[k]);
+      guardaSt();aplicar(r);otraVez=st.pend.s.length||st.pend.f.length;
+    }else if(r.error==='cerrado'){sinRed=false;aplicar(r)}
+    else{sinRed=true;otraVez=true}
+  }catch(e){sinRed=true;otraVez=true}
+  inflight=false;pintaSync();
+  if(otraVez)setTimeout(enviar,sinRed?8000:300);
+}
+async function leer(){
+  if(!st||!API||inflight||document.hidden||cfg.vista==='inicio')return;
+  if(st.pend.s.length||st.pend.f.length){enviar();return}
+  try{const r=await llamar({accion:'leer',id:st.id});if(r.ok){sinRed=false;aplicar(r)}else if(r.error==='id'){sinRed=false}}
+  catch(e){sinRed=true}
+  pintaSync();
+}
+function pintaSync(){
+  const el=$('sync');if(!st||cfg.vista==='inicio'){el.hidden=true;return}
+  el.hidden=false;const n=st.pend.s.length+st.pend.f.length;
+  let c='',t='Guardado';
+  if(!API){c='cola';t='Modo prueba'}
+  else if(cerrado()&&n){c='mal';t=n+' sin guardar: test cerrado'}
+  else if(cerrado()){c='';t='Test cerrado'}
+  else if(sinRed&&n){c='cola';t=n+' sin enviar'}
+  else if(sinRed){c='cola';t='Sin señal'}
+  else if(n||inflight){c='env';t='Enviando…'}
+  el.className='sync '+c;el.textContent=t;
+}
+window.addEventListener('online',()=>{sinRed=false;enviar()});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){leer();pidePantalla()}});
+setInterval(leer,15000);
+
+/* ---------- vistas ---------- */
+const VISTAS=['inicio','test','serie','crono'];
+function ir(v,sid,empuja){
+  cfg.vista=v;if(sid!==undefined)cfg.sid=sid;guardaCfg();
+  if(empuja!==false)history.pushState({v,sid:cfg.sid},'');
+  VISTAS.forEach(x=>$('v-'+x).hidden=x!==v);
+  $('btn-volver').hidden=v==='inicio';
+  window.scrollTo(0,0);repinta();
+}
+function arriba(){
+  if(!$('h-det').hidden){cierraDetalle();return}
+  if(!$('h-nad').hidden){$('h-nad').hidden=true;return}
+  const v=cfg.vista;
+  if(v==='crono'||v==='serie')ir('test',cfg.sid,false);else if(v==='test'){ir('inicio','',false)}
+}
+$('btn-volver').onclick=()=>history.length>1?history.back():arriba();
+window.addEventListener('popstate',()=>arriba());
+function repinta(){
+  $('t-barra').textContent=st&&cfg.vista!=='inicio'?st.id:'Tests de agua';
+  if(cfg.vista==='inicio')pintaInicio();
+  else if(!st){ir('inicio','',false);return}
+  else if(cfg.vista==='test')pintaTest();
+  else if(cfg.vista==='serie')pintaSerie();
+  else if(cfg.vista==='crono')pintaCrono();
+  if(!$('h-det').hidden)refrescaDetalle();
+  pintaSync();
+}
+let tAviso=null,deshacer=null,msgCrono=null;
+function aviso(t,fnDeshacer){
+  if(cfg.vista==='crono'&&$('h-det').hidden&&$('h-nad').hidden){
+    msgCrono=t;deshacer=fnDeshacer||null;$('toast').hidden=true;pintaMsgCrono();
+    clearTimeout(tAviso);tAviso=setTimeout(()=>{msgCrono=null;deshacer=null;pintaMsgCrono()},fnDeshacer?6000:4000);return;
+  }
+  $('toast-t').textContent=t;$('toast').hidden=false;deshacer=fnDeshacer||null;$('toast-b').hidden=!deshacer;
+  clearTimeout(tAviso);tAviso=setTimeout(()=>{$('toast').hidden=true;deshacer=null},fnDeshacer?6000:4000);
+}
+$('toast-b').onclick=()=>{if(deshacer){deshacer();deshacer=null}$('toast').hidden=true};
+let queEstado='';
+function pintaMsgCrono(){
+  const q=$('k-que');if(!q)return;
+  q.textContent=msgCrono||queEstado;q.parentNode.classList.toggle('msg',!!msgCrono);$('k-desh').hidden=!(msgCrono&&deshacer);
+}
+$('k-desh').onclick=()=>{if(deshacer){deshacer();deshacer=null}msgCrono=null;pintaMsgCrono()};
+async function copia(t){try{await navigator.clipboard.writeText(t);aviso('ID copiado')}catch(e){aviso('Copia el ID: '+t)}}
+
+/* ---------- inicio ---------- */
+function hoyISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
+const MESES=['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+const fechaLarga=f=>{const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(f||'');return m?(+m[3])+' '+MESES[+m[2]-1]+' '+m[1]:f};
+function pintaInicio(){
+  if(!$('e-nombre').value)$('e-nombre').value=cfg.juez||'';
+  if(!$('c-fecha').value)$('c-fecha').value=hoyISO();
+  const rec=(cfg.recientes||[]).slice(0,6);
+  $('recientes').hidden=!rec.length;
+  $('l-recientes').innerHTML=rec.map(r=>`<button class="reciente" type="button" data-id="${esc(r.id)}"><span><b>${esc(fechaLarga(r.fecha))} · ${esc(r.profesor)}</b><small>${esc(r.id)}</small></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`).join('');
+}
+$('l-recientes').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;$('e-id').value=b.dataset.id;if(!$('e-nombre').value.trim())$('e-nombre').focus();else $('f-entrar').requestSubmit()});
+const normId=s=>String(s||'').toUpperCase().replace(/\s+/g,'').trim();
+async function entrar(id,juez,errEl,btn){
+  errEl.hidden=true;
+  const local=abreLocal(id);
+  btn.disabled=true;const txt=btn.textContent;btn.textContent='Comprobando…';
+  try{
+    const r=await llamar({accion:'entrar',id});
+    if(!r.ok){
+      errEl.textContent=r.error==='id'?'Ese ID no existe. Revisa las cifras del final.':r.error==='bloqueado'?'Demasiados intentos con IDs incorrectos. Espera 10 minutos.':'No se pudo entrar. Inténtalo de nuevo.';
+      errEl.hidden=false;return false;
+    }
+    if(!local)st={id,test:r.test,series:{},filas:{},padron:[],pend:{s:[],f:[]}};
+    sinRed=false;aplicar(r);
+  }catch(e){
+    if(!local){errEl.textContent='No hay conexión. Para entrar por primera vez a un test necesitas internet.';errEl.hidden=false;return false}
+    sinRed=true;aviso('Sin señal: trabajas con lo guardado en este celular');
+  }finally{btn.disabled=false;btn.textContent=txt}
+  cfg.juez=juez;cfg.id=id;
+  cfg.recientes=[{id,fecha:st.test.fecha,profesor:st.test.profesor}].concat((cfg.recientes||[]).filter(x=>x.id!==id)).slice(0,8);
+  guardaCfg();guardaSt();ir('test','');pidePantalla();
+  if(st.pend.s.length||st.pend.f.length)enviar();
+  return true;
+}
+$('f-entrar').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const juez=$('e-nombre').value.trim(),id=normId($('e-id').value),err=$('e-error');
+  if(!juez){err.textContent='Escribe tu nombre: queda junto a cada tiempo que registres.';err.hidden=false;$('e-nombre').focus();return}
+  if(!/^\d{4}-\d{2}-\d{2}-[A-Z]+-\d{3}$/.test(id)){err.textContent='El ID tiene esta forma: 2026-11-09-RICARDO-482.';err.hidden=false;$('e-id').focus();return}
+  await entrar(id,juez,err,$('e-btn'));
+});
+let creado=null;
+$('f-crear').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const fecha=$('c-fecha').value,prof=$('c-prof').value.trim(),clave=$('c-clave').value,err=$('c-error');err.hidden=true;
+  if(!fecha||!prof||!clave){err.textContent='Completa la fecha, el profesor y la contraseña.';err.hidden=false;return}
+  const btn=$('c-btn');btn.disabled=true;btn.textContent='Creando…';
+  try{
+    const r=await llamar({accion:'crear',fecha,profesor:prof,clave});
+    if(!r.ok){err.textContent=r.error==='clave'?'La contraseña del club no es correcta.':'No se pudo crear el test. Inténtalo de nuevo.';err.hidden=false;return}
+    creado={r,prof};$('c-clave').value='';
+    $('c-id').textContent=r.test.id;$('f-crear').hidden=true;$('c-listo').hidden=false;
+  }catch(x){err.textContent='No hay conexión. Crear un test necesita internet.';err.hidden=false}
+  finally{btn.disabled=false;btn.textContent='Crear test'}
+});
+$('c-copiar').onclick=()=>creado&&copia(creado.r.test.id);
+$('c-compartir').onclick=async()=>{if(!creado)return;const t='Test de agua '+fechaLarga(creado.r.test.fecha)+' · ID: '+creado.r.test.id;try{if(navigator.share)await navigator.share({text:t});else copia(creado.r.test.id)}catch(e){}};
+$('c-otro').onclick=()=>{creado=null;$('f-crear').hidden=false;$('c-listo').hidden=true};
+$('c-empezar').onclick=()=>{
+  if(!creado)return;const r=creado.r,id=r.test.id;
+  st={id,test:r.test,series:{},filas:{},padron:r.padron||[],pend:{s:[],f:[]}};cro={};mis={};
+  cfg.juez=cfg.juez||creado.prof;cfg.id=id;
+  cfg.recientes=[{id,fecha:r.test.fecha,profesor:r.test.profesor}].concat((cfg.recientes||[]).filter(x=>x.id!==id)).slice(0,8);
+  guardaCfg();guardaSt();creado=null;$('f-crear').hidden=false;$('c-listo').hidden=true;ir('test','');pidePantalla();
+};
+
+/* ---------- test ---------- */
+function pintaTest(){
+  const t=st.test;
+  $('t-titulo').textContent='Test del '+fechaLarga(t.fecha);
+  $('t-sub').textContent='Toma: '+t.profesor+' · ID '+st.id;
+  const ss=seriesVivas(),it=intentos();
+  let tiempos=0,pend=0,falta=0;
+  ss.forEach(s=>ocupados(s).forEach(f=>{if(f.fin&&!f.ns)tiempos++;else if(!f.ns)falta++;if(f.pend)pend++}));
+  $('t-resumen').innerHTML=`<span><b>${ss.length}</b> ${ss.length===1?'serie':'series'}</span><span><b>${tiempos}</b> ${tiempos===1?'tiempo':'tiempos'}</span>`+
+    (falta?`<span><b>${falta}</b> sin tiempo final</span>`:'')+(pend?`<span><b>${pend}</b> por revisar en el Maestro</span>`:'');
+  $('t-cerrado').hidden=!cerrado();$('t-nueva').hidden=cerrado();$('t-cerrar').hidden=cerrado();
+  $('t-salir').textContent='Salir del test ('+cfg.juez+')';
+  if(!ss.length){$('t-series').innerHTML=`<div class="vacio">Todavía no hay series. Toca <b>Nueva serie</b>, elige la prueba y los nadadores, y empieza a cronometrar.</div>`;return}
+  $('t-series').innerHTML='<div class="series">'+ss.map(s=>{
+    const oc=ocupados(s),hechos=oc.filter(f=>f.fin||f.ns).length;
+    const nombres=oc.map(f=>corto(f)+(it[f.k]>1?' (int. '+it[f.k]+')':'')).join(', ')||'Sin nadadores';
+    return `<button class="serie-f" type="button" data-sid="${esc(s.sid)}"><span class="q">Serie ${s.n} <span>· ${esc(nombrePrueba(s.prueba))} ${esc(s.estilo)}${s.pases?' · pases cada '+s.pases+' m':''}</span></span>
+      <span class="cuantos"><b>${hechos} de ${oc.length}</b>con tiempo</span><span class="quienes">${esc(nombres)}</span></button>`}).reverse().join('')+'</div>';
+}
+$('t-series').addEventListener('click',e=>{const b=e.target.closest('[data-sid]');if(b)ir('crono',b.dataset.sid)});
+$('t-nueva').onclick=()=>nuevaSerie(null);
+$('t-copiar').onclick=()=>copia(st.id);
+let armaCerrar=0;
+$('t-cerrar').onclick=async()=>{
+  const n=st.pend.s.length+st.pend.f.length;
+  if(n){aviso('Hay '+n+' cambios sin enviar. Espera a que diga Guardado.');enviar();return}
+  if(Date.now()-armaCerrar>4000){armaCerrar=Date.now();$('t-cerrar').textContent='Toca otra vez para cerrar';setTimeout(()=>{$('t-cerrar').textContent='Cerrar test'},4000);return}
+  try{const r=await llamar({accion:'cerrar',id:st.id,juez:cfg.juez});if(r.ok){aplicar(r);aviso('Test cerrado. Ya se puede cargar a la base.')}else aviso('No se pudo cerrar. Inténtalo de nuevo.')}
+  catch(e){aviso('Sin conexión: el test no se cerró.')}
+  $('t-cerrar').textContent='Cerrar test';
+};
+$('r-btn').onclick=async()=>{
+  const clave=$('r-clave').value,err=$('r-error');err.hidden=true;if(!clave)return;
+  try{const r=await llamar({accion:'reabrir',id:st.id,clave,juez:cfg.juez});
+    if(r.ok){$('r-clave').value='';aplicar(r);aviso('Test reabierto');if(st.pend.s.length||st.pend.f.length)enviar()}
+    else{err.textContent=r.error==='clave'?'La contraseña no es correcta.':'No se pudo reabrir.';err.hidden=false}}
+  catch(e){err.textContent='Sin conexión.';err.hidden=false}
+};
+$('t-salir').onclick=()=>{cfg.id='';guardaCfg();st=null;ir('inicio','')};
+
+/* ---------- armar serie ---------- */
+let borrador=null;      // la serie que se está armando: {s, lanes:{c:{nid,nom,pend}}, nueva}
+function nuevaSerie(base){
+  const ss=seriesVivas(),ult=base||ss[ss.length-1];
+  const todas=Object.values(st.series),n=(todas.reduce((m,s)=>Math.max(m,s.n),0))+1;
+  const sid=Math.random().toString(36).slice(2,8);
+  let s;
+  if(ult){
+    const est=PRUEBAS[ult.prueba],sig=est[(est.indexOf(ult.estilo)+1)%est.length];
+    s={sid,n,prueba:ult.prueba,estilo:base?sig:ult.estilo,pases:ult.pases,carriles:ult.carriles,borrada:false};
+  }else s={sid,n,prueba:25,estilo:'Libre',pases:0,carriles:4,borrada:false};
+  const lanes={};
+  if(ult)lanesDe(ult).forEach(f=>{if(f.nid||f.nom)lanes[f.c]={nid:f.nid,nom:f.nom,pend:f.pend}});
+  borrador={s,lanes,nueva:true};
+  ir('serie',sid);
+}
+function editaSerie(sid,empuja){
+  const s=Object.assign({},st.series[sid]),lanes={};
+  lanesDe(s).forEach(f=>{if(f.nid||f.nom)lanes[f.c]={nid:f.nid,nom:f.nom,pend:f.pend}});
+  borrador={s,lanes,nueva:false};ir('serie',sid,empuja);
+}
+const tieneTiempos=sid=>Object.values(st.filas).some(f=>f.sid===sid&&(f.fin||f.pas.some(Boolean)));
+function pintaSerie(){
+  if(!borrador||borrador.s.sid!==cfg.sid){if(st.series[cfg.sid])editaSerie(cfg.sid);else ir('test','',false);return}
+  const s=borrador.s,bloq=!borrador.nueva&&tieneTiempos(s.sid);
+  $('s-titulo').textContent=(borrador.nueva?'Nueva serie':'Serie')+' '+s.n;
+  $('s-sub').textContent=bloq?'Ya tiene tiempos: la prueba y los pases quedan fijos.':'Elige la prueba y los nadadores de cada carril.';
+  $('s-prueba').innerHTML=DISTS.map(p=>`<button type="button" data-p="${p}" aria-pressed="${s.prueba===p}" ${bloq&&s.prueba!==p?'disabled':''}>${p===15?'15 salida':p}</button>`).join('');
+  $('s-estilo').innerHTML=PRUEBAS[s.prueba].map(e=>`<button type="button" data-e="${e}" aria-pressed="${s.estilo===e}">${e}</button>`).join('');
+  const op=opPases(s.prueba);
+  $('s-pases').innerHTML=[0].concat(op).map(p=>`<button type="button" data-pc="${p}" aria-pressed="${s.pases===p}" ${bloq&&s.pases!==p?'disabled':''}>${p?'Cada '+p+' m':'Sin pases'}</button>`).join('');
+  const np=pasesDe(s).length;
+  $('s-pases-ayuda').textContent=!op.length?'En esta prueba solo se toma el tiempo final.':np?np+(np===1?' toque de pase':' toques de pase')+' por nadador, más el final.':'Solo el tiempo final.';
+  $('s-carriles').innerHTML=[1,2,3,4,5,6,7,8].map(c=>`<button type="button" data-c="${c}" aria-pressed="${s.carriles===c}">${c}</button>`).join('');
+  let h='';
+  for(let c=1;c<=s.carriles;c++){
+    const l=borrador.lanes[c],nd=l&&l.nid?nadador(l.nid):null;
+    h+=`<button class="carril-f" type="button" data-lane="${c}"><span class="n">${c}</span><span class="quien">${l?`<b>${esc(l.nom)}</b><small>${l.pend?'Nadador por revisar':esc(nd?nd.cat+(nd.g?' · '+nd.g:''):'')}</small>`:'<span class="elige">Elegir nadador</span>'}</span></button>`;
+  }
+  $('s-lanes').innerHTML=h;
+  $('s-borrar').hidden=borrador.nueva;
+  const n=Object.keys(borrador.lanes).filter(c=>+c<=s.carriles).length;
+  $('s-listo').textContent=n?'Ir al cronómetro':'Elige al menos un nadador';$('s-listo').disabled=!n;
+}
+$('s-prueba').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;const s=borrador.s,p=+b.dataset.p;if(p===s.prueba)return;
+  s.prueba=p;if(!PRUEBAS[p].includes(s.estilo))s.estilo=PRUEBAS[p][0];s.pases=pasesDef(p);pintaSerie()});
+$('s-estilo').addEventListener('click',e=>{const b=e.target.closest('[data-e]');if(!b)return;borrador.s.estilo=b.dataset.e;pintaSerie()});
+$('s-pases').addEventListener('click',e=>{const b=e.target.closest('[data-pc]');if(!b)return;borrador.s.pases=+b.dataset.pc;pintaSerie()});
+$('s-carriles').addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;borrador.s.carriles=+b.dataset.c;pintaSerie()});
+$('s-limpiar').onclick=()=>{borrador.lanes={};pintaSerie()};
+$('s-lanes').addEventListener('click',e=>{const b=e.target.closest('[data-lane]');if(b)abreSelector(+b.dataset.lane)});
+$('s-listo').onclick=()=>{
+  const s=borrador.s,viejas=!borrador.nueva?lanesDe(st.series[s.sid]):[];
+  const sAnt=st.series[s.sid];
+  if(!sAnt||JSON.stringify([sAnt.prueba,sAnt.estilo,sAnt.pases,sAnt.carriles])!==JSON.stringify([s.prueba,s.estilo,s.pases,s.carriles])||borrador.nueva)tocaSerie(Object.assign({},s));
+  for(let c=1;c<=10;c++){
+    const l=c<=s.carriles?borrador.lanes[c]:null,f=fila(s.sid,c);
+    const antes=f.nid||f.nom?(f.nid+'|'+f.nom):'',ahora=l?(l.nid+'|'+l.nom):'';
+    if(antes===ahora)continue;
+    if(!l&&!st.filas[f.k])continue;
+    toca(s.sid,c,x=>{
+      if(!l){x.nid='';x.nom='';x.pend=false;x.fin=null;x.pas=[];x.man=false;x.ns=false;x.pul={};x.obs='';return}
+      x.nid=l.nid;x.nom=l.nom;x.pend=!!l.pend;
+    });
+  }
+  const sid=s.sid;borrador=null;
+  history.replaceState({v:'crono',sid},'');ir('crono',sid,false);
+};
+let armaBorrar=0;
+$('s-borrar').onclick=()=>{
+  if(Date.now()-armaBorrar>4000){armaBorrar=Date.now();$('s-borrar').textContent='Toca otra vez para eliminar la serie';setTimeout(()=>$('s-borrar').textContent='Eliminar esta serie',4000);return}
+  const s=Object.assign({},st.series[borrador.s.sid],{borrada:true});tocaSerie(s);borrador=null;
+  aviso('Serie '+s.n+' eliminada',()=>{const v=Object.assign({},st.series[s.sid],{borrada:false});tocaSerie(v);repinta()});
+  history.replaceState({v:'test',sid:''},'');ir('test','',false);
+};
+
+/* ---------- selector de nadador ---------- */
+let selCarril=0,selGrupo=load('ta_grupo','Todos');
+const normTxt=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+const grupoDe=n=>n.g||(['Master','Premaster'].includes(n.cat)?'Masters':'Sin grupo');
+function abreSelector(c){
+  selCarril=c;$('h-nad-t').textContent='Carril '+c;$('h-q').value='';$('h-nad').hidden=false;$('h-nad').scrollTop=0;
+  history.pushState({hoja:'nad'},'');pintaSelector();
+}
+function pintaSelector(){
+  const grupos=['Todos'].concat([...new Set(st.padron.map(grupoDe))].sort((a,b)=>a.localeCompare(b,'es')));
+  if(!grupos.includes(selGrupo))selGrupo='Todos';
+  $('h-grupos').innerHTML=grupos.map(g=>`<button type="button" data-g="${esc(g)}" aria-pressed="${g===selGrupo}">${esc(g)}</button>`).join('');
+  const q=normTxt($('h-q').value).trim(),en={};
+  Object.entries(borrador.lanes).forEach(([c,l])=>{if(l.nid)en[l.nid]=c});
+  let L=st.padron.filter(n=>q?normTxt(n.n).split(/\s+/).some(w=>w.startsWith(q))||normTxt(n.n).includes(q):(selGrupo==='Todos'||grupoDe(n)===selGrupo));
+  L.sort((a,b)=>a.n.localeCompare(b.n,'es'));
+  $('h-lista').innerHTML=L.length?L.map(n=>`<button class="nad" type="button" data-id="${esc(n.id)}"><span><b>${esc(n.n)}</b><small>${esc(n.cat||'Sin categoría')} · ${esc(grupoDe(n))}</small></span>${en[n.id]?`<span class="pill ya">Carril ${en[n.id]}</span>`:''}</button>`).join('')
+    :`<div class="nad" style="color:var(--muted)">${st.padron.length?'Nadie coincide con «'+esc($('h-q').value)+'».':'No llegó la lista de nadadores. Revisa la conexión y vuelve a entrar al test.'}</div>`;
+  const raw=$('h-q').value.trim(),hayExacto=L.some(n=>normTxt(n.n)===q);
+  $('h-extra').innerHTML=(raw.length>=3&&!hayExacto?`<button class="btn ancho" type="button" id="h-nuevo">Añadir «${esc(raw)}» como nadador por revisar</button><p class="ayuda">Su tiempo se guarda, pero no pasa a la base hasta confirmarlo en el Maestro.</p>`:'')+
+    (borrador.lanes[selCarril]?`<button class="btn texto peligro" type="button" id="h-quitar">Dejar el carril ${selCarril} vacío</button>`:'');
+}
+$('h-q').addEventListener('input',pintaSelector);
+$('h-grupos').addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;selGrupo=b.dataset.g;store('ta_grupo',selGrupo);$('h-q').value='';pintaSelector()});
+function asigna(l){
+  Object.keys(borrador.lanes).forEach(c=>{const x=borrador.lanes[c];if(l&&l.nid&&x.nid===l.nid&&+c!==selCarril)delete borrador.lanes[c]});
+  if(l)borrador.lanes[selCarril]=l;else delete borrador.lanes[selCarril];
+  const s=borrador.s,hecho=selCarril;let sig=0;
+  if(l)for(let c=selCarril+1;c<=s.carriles;c++)if(!borrador.lanes[c]){sig=c;break}
+  if(sig){selCarril=sig;$('h-nad-t').textContent='Carril '+sig;$('h-q').value='';pintaSelector();$('h-nad').scrollTop=0;aviso(l.nom+' en el carril '+hecho+'. Ahora el carril '+sig+'.')}
+  else{history.back()}
+  pintaSerie();
+}
+$('h-lista').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;const n=nadador(b.dataset.id);asigna({nid:n.id,nom:n.n,pend:false})});
+$('h-extra').addEventListener('click',e=>{
+  if(e.target.id==='h-nuevo'){const raw=$('h-q').value.trim().replace(/\s+/g,' ').slice(0,60);asigna({nid:'',nom:raw,pend:true})}
+  if(e.target.id==='h-quitar')asigna(null);
+});
+$('h-nad-cerrar').onclick=()=>history.back();
+
+/* ---------- cronómetro ---------- */
+// La marca que vale es la del instante en que el dedo toca la pantalla (pointerdown), no la del clic.
+let ultimoToque=null;
+document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('[data-tap]'))ultimoToque={t:e.timeStamp,visto:performance.now()}},true);
+const marcaToque=e=>{const t=ultimoToque&&performance.now()-ultimoToque.visto<1500?ultimoToque.t:e.timeStamp;ultimoToque=null;return t};
+function msEn(c,t){
+  // t es una marca de performance.now(). Si el teléfono se durmió, ese reloj pudo pausarse: entonces manda el del sistema.
+  const p=performance.timeOrigin+t-c.p,d=Date.now()-(performance.now()-t)-c.d;
+  return Math.abs(p-d)>500?d:p;
+}
+const serieAct=()=>st&&st.series[cfg.sid];
+function estadoLane(s,f){
+  if(f.ns)return 'ns';if(f.fin)return 'fin';if(cro[s.sid])return 'corre';return 'espera';
+}
+function pintaCrono(){
+  const s=serieAct();if(!s||s.borrada){ir('test','',false);return}
+  const oc=ocupados(s),it=intentos(),ps=pasesDe(s),salida=cro[s.sid];
+  $('k-titulo').textContent='Serie '+s.n+' · '+nombrePrueba(s.prueba)+' '+s.estilo;
+  $('k-sub').textContent=(s.pases?'Pases cada '+s.pases+' m':'Sin pases')+(conPulso(s)?' · pulso al llegar, a 1 y a 2 minutos':'');
+  $('v-crono').classList.toggle('compacto',s.carriles>4);
+  const mios=oc.filter(f=>esMio(s,f.c)),corriendo=mios.filter(f=>estadoLane(s,f)==='corre').length;
+  $('k-reloj').classList.toggle('corre',!!salida&&corriendo>0);
+  const b=$('k-salida');
+  if(cerrado()){b.hidden=true}
+  else if(!salida){b.hidden=false;b.className='salida';b.textContent='Salida';b.dataset.tap='1';b.disabled=!mios.length}
+  else{b.hidden=false;b.className='salida sec'+(armaAnular?' arma':'');b.textContent=armaAnular?'Toca para anular':'Anular salida';delete b.dataset.tap;b.disabled=false}
+  const hechos=mios.filter(f=>f.fin||f.ns).length;
+  queEstado=cerrado()?'El test está cerrado.':!mios.length?'Elige abajo los carriles que tomas en este celular.':!salida?'Toca Salida con la señal de partida. Arrancan tus '+mios.length+(mios.length===1?' carril':' carriles')+'.':corriendo?corriendo+(corriendo===1?' nadador en el agua':' nadadores en el agua')+' · '+hechos+' de '+mios.length+' llegaron':'Llegaron todos tus carriles.';
+  pintaMsgCrono();
+  if(!salida)$('k-t').textContent='00:00.000';
+  else if(!corriendo){const mx=Math.max(0,...mios.map(f=>f.fin||0));$('k-t').textContent=fmtMs(mx)}
+  // carriles de este celular
+  $('k-mis').innerHTML=oc.length>1?`<span>Mis carriles</span><div class="chips">${oc.map(f=>`<button type="button" data-mio="${f.c}" aria-pressed="${esMio(s,f.c)}" aria-label="Carril ${f.c}">${f.c}</button>`).join('')}</div>`:'';
+  $('k-lanes').innerHTML=oc.length?oc.map(f=>laneHtml(s,f,ps,it)).join(''):`<div class="ln"><span></span><span class="info"><small>No hay nadadores en esta serie.</small></span></div>`;
+  $('k-sig').hidden=cerrado()||!oc.length;$('k-editar').hidden=cerrado();
+  $('k-sig').classList.toggle('prim',!!salida&&!corriendo&&mios.length>0);
+}
+function laneHtml(s,f,ps,it){
+  const e=estadoLane(s,f),mio=esMio(s,f.c),inte=it[f.k]>1?' · intento '+it[f.k]:'';
+  const nPas=f.pas.filter(Boolean).length,tramos=ps.length+1;
+  const pista=`<span class="pista" aria-hidden="true">${Array.from({length:tramos},(_,i)=>`<i class="${i<nPas||(i===tramos-1&&f.fin)?'on':''}"></i>`).join('')}</span>`;
+  let sub='';
+  const ultimo=(()=>{for(let j=ps.length-1;j>=0;j--)if(f.pas[j])return [ps[j],f.pas[j]];return null})();
+  if(f.ns)sub='No se presentó';
+  else if(f.fin)sub=subFin(s,f);
+  else if(e==='corre')sub=ultimo?`<em>${ultimo[0]} m · ${fmtT(ultimo[1])}</em>`+(f.pas[ps.indexOf(ultimo[0])-1]?' · parcial '+fmtCs(csDe(ultimo[1])-csDe(f.pas[ps.indexOf(ultimo[0])-1])):''):'En el agua';
+  else sub=(f.pend?'Por revisar · ':'')+(f.juez&&f.juez!==cfg.juez&&(f.fin||nPas)?'Lo toma '+f.juez:'Listo para la salida')+(conPulso(s)&&f.pul&&f.pul.i?' · pulso inicial '+f.pul.i:'');
+  const nombre=esc(corto(f))+'<span style="color:var(--muted);font-weight:500">'+esc(inte)+'</span>';
+  if(!mio){
+    return `<div class="ln ajeno"><span class="n">${f.c}</span><button class="info" type="button" data-det="${f.c}"><b>${nombre}</b><small>${f.fin?'Final '+fmtT(f.fin):f.ns?'No se presentó':'Lo toma otro celular'}${f.juez&&f.juez!==cfg.juez?' · '+esc(f.juez):''}</small></button><span></span></div>`;
+  }
+  let bts='';
+  if(cerrado()){bts=''}
+  else if(e==='corre'){
+    const sig=ps.find((m,j)=>!f.pas[j]),ja=ps.indexOf(sig);
+    bts=`<div class="bts">${sig?`<button class="b-pase" type="button" data-tap="1" data-pase="${f.c}" data-j="${ja}" aria-label="Pase ${sig} metros carril ${f.c}">${sig} m</button>`:(ps.length?'<span class="b-hueco" aria-hidden="true"></span>':'')}<button class="b-parar ${ps.length?'':'solo'}" type="button" data-tap="1" data-parar="${f.c}" aria-label="Parar carril ${f.c}">Parar</button></div>`;
+  }else if(e==='fin'){
+    bts=`<button class="final" type="button" data-det="${f.c}"><b>${fmtT(f.fin)}</b><small>${f.man?'Escrito a mano':'Corregir'}</small></button>`;
+  }else if(e==='ns'){bts=`<button class="btn texto" type="button" data-det="${f.c}">Corregir</button>`}
+  return `<div class="ln ${e==='corre'?'corre':''}" id="ln-${f.c}"><span class="n">${f.c}</span><button class="info" type="button" data-det="${f.c}"><b>${nombre}</b><small id="sub-${f.c}">${sub}</small>${pista}</button>${bts}</div>`;
+}
+// Lo que dice la fila de un nadador que ya llegó: primero el pulso que toca, si lo hay; si no, su último pase.
+function subFin(s,f){
+  const ps=pasesDe(s);let u=null;for(let j=ps.length-1;j>=0;j--)if(f.pas[j]){u=[ps[j],f.pas[j]];break}
+  return pulsoTxt(s,f)||(u?'Último pase '+u[0]+' m en '+fmtT(u[1]):'Tiempo final');
+}
+function pulsoTxt(s,f){
+  if(!conPulso(s)||!cro[s.sid]||f.man)return '';
+  const pu=f.pul||{};
+  if(pu.m2)return '';
+  const trans=(Date.now()-(cro[s.sid].d+f.fin))/1000;
+  if(trans>600)return '';                                    // pasado el rato, deja de recordar
+  const toca=!pu.m1&&trans<120?['1 min',60]:(!pu.m2?['2 min',120]:null);
+  if(!toca)return '';
+  const resta=Math.ceil(toca[1]-trans);
+  if(resta>0)return `<span class="pulso">Pulso de ${toca[0]} en ${resta} s</span>`;
+  return `<span class="pulso ya">Toma el pulso de ${toca[0]}</span>`;
+}
+// reloj y avisos de pulso
+let audio=null;
+function pita(){try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();const o=audio.createOscillator(),g=audio.createGain();o.frequency.value=880;g.gain.value=.25;o.connect(g);g.connect(audio.destination);o.start();o.stop(audio.currentTime+.35)}catch(e){}try{navigator.vibrate&&navigator.vibrate([200,100,200])}catch(e){}}
+const pitados={};
+(function cuadro(){
+  if(cfg.vista==='crono'&&st){
+    const s=serieAct();
+    if(s&&cro[s.sid]){
+      const mios=ocupados(s).filter(f=>esMio(s,f.c));
+      if(mios.some(f=>estadoLane(s,f)==='corre'))$('k-t').textContent=fmtMs(msEn(cro[s.sid],performance.now()));
+    }
+  }
+  requestAnimationFrame(cuadro);
+})();
+setInterval(()=>{
+  if(cfg.vista!=='crono'||!st)return;const s=serieAct();if(!s||!conPulso(s)||!cro[s.sid])return;
+  ocupados(s).filter(f=>esMio(s,f.c)&&f.fin&&!f.man).forEach(f=>{
+    const el=$('sub-'+f.c);if(el)el.innerHTML=subFin(s,f);
+    const trans=(Date.now()-(cro[s.sid].d+f.fin))/1000;
+    [['m1',60],['m2',120]].forEach(([q,seg])=>{const k=f.k+q;if(trans>=seg&&trans<seg+20&&!(f.pul||{})[q]&&!pitados[k]){pitados[k]=1;pita();aviso('Carril '+f.c+': toma el pulso de '+(seg/60)+' min')}});
+  });
+},500);
+
+let armaAnular=0;
+$('k-salida').addEventListener('click',e=>{
+  const s=serieAct();if(!s||cerrado())return;
+  if(!cro[s.sid]){
+    const t=marcaToque(e);
+    cro[s.sid]={p:performance.timeOrigin+t,d:Date.now()-(performance.now()-t)};
+    try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume()}catch(x){}
+    guardaSt();pintaCrono();return;
+  }
+  if(!armaAnular){armaAnular=1;pintaCrono();setTimeout(()=>{armaAnular=0;if(cfg.vista==='crono')pintaCrono()},3000);return}
+  armaAnular=0;
+  const salida=cro[s.sid];delete cro[s.sid];
+  const antes={};
+  ocupados(s).filter(f=>esMio(s,f.c)&&!f.man&&(f.fin||f.pas.some(Boolean))).forEach(f=>{antes[f.c]=JSON.parse(JSON.stringify(f));toca(s.sid,f.c,x=>{x.fin=null;x.pas=[]},true)});
+  guardaSt();pintaCrono();
+  aviso('Salida anulada',()=>{cro[s.sid]=salida;Object.entries(antes).forEach(([c,f])=>toca(s.sid,+c,x=>{x.fin=f.fin;x.pas=f.pas},true));guardaSt();pintaCrono()});
+});
+$('k-lanes').addEventListener('click',e=>{
+  const s=serieAct();if(!s)return;
+  const bp=e.target.closest('[data-pase]'),bf=e.target.closest('[data-parar]'),bd=e.target.closest('[data-det]');
+  if(bp||bf){
+    const t=marcaToque(e),c=+(bp||bf).dataset[bp?'pase':'parar'],sal=cro[s.sid];if(!sal)return;
+    const f=fila(s.sid,c),m=Math.round(msEn(sal,t)),prevs=f.pas.filter(Boolean),ant=prevs.length?Math.max(...prevs):0;
+    if(m-ant<(bp?3000:1000)){aviso('Toque ignorado: muy seguido al anterior');return}
+    const antes=JSON.parse(JSON.stringify(f));
+    if(bp){const j=+bp.dataset.j;toca(s.sid,c,x=>{x.pas[j]=m;x.man=false},true);aviso('Carril '+c+': '+pasesDe(s)[j]+' m en '+fmtT(m),()=>{toca(s.sid,c,x=>{x.pas=antes.pas},true);pintaCrono()})}
+    else{toca(s.sid,c,x=>{x.fin=m;x.man=false},true);aviso('Carril '+c+': llegó en '+fmtT(m),()=>{toca(s.sid,c,x=>{x.fin=antes.fin},true);pintaCrono()})}
+    pintaCrono();return;
+  }
+  if(bd)abreDetalle(+bd.dataset.det);
+});
+$('k-mis').addEventListener('click',e=>{
+  const b=e.target.closest('[data-mio]');if(!b)return;const s=serieAct(),c=+b.dataset.mio;
+  let m=misCarriles(s).slice();m=m.includes(c)?m.filter(x=>x!==c):m.concat(c).sort((a,b)=>a-b);
+  mis[s.sid]=m;guardaSt();pintaCrono();
+});
+$('k-editar').onclick=()=>editaSerie(cfg.sid);
+$('k-sig').onclick=()=>nuevaSerie(serieAct());
+
+/* ---------- detalle de un carril ---------- */
+let detC=0;
+function abreDetalle(c){detC=c;$('h-det').hidden=false;$('h-det').scrollTop=0;history.pushState({hoja:'det'},'');pintaDetalle()}
+function cierraDetalle(){$('h-det').hidden=true;if(cfg.vista==='crono')pintaCrono()}
+$('h-det-cerrar').onclick=()=>history.back();
+function pintaDetalle(){
+  const s=serieAct(),f=fila(s.sid,detC),ps=pasesDe(s),bloq=cerrado();
+  $('h-det-t').textContent='Carril '+detC+' · '+(f.nom||'vacío');
+  const dis=bloq?'disabled':'';
+  const campoT=(id,lab,ms,cls)=>`<label class="campo ${cls||''}" for="${id}">${lab}<input id="${id}" inputmode="numeric" autocomplete="off" maxlength="9" value="${ms!=null?digitosATexto(msADigitos(ms)):''}" ${dis}><span class="par" id="${id}-par"></span></label>`;
+  let h=`<div class="titulo"><h1>${esc(f.nom||'Carril vacío')}</h1><p class="sub">Serie ${s.n} · ${esc(nombrePrueba(s.prueba))} ${esc(s.estilo)} · carril ${detC}${f.juez?' · registró '+esc(f.juez):''}</p></div>`;
+  if(f.pend)h+=`<div class="aviso-caja"><p>Este nadador no está en la lista. Su tiempo se guarda, pero no pasa a la base hasta confirmarlo en el Maestro.</p></div>`;
+  h+=`<section class="panel"><h2>Tiempos</h2><p>Escribe solo números: 3245 es 32.45 y 10512 es 1:05.12. Los pases son el tiempo acumulado al pasar esa distancia.</p><div class="tiempos">`+
+    ps.map((m,j)=>campoT('d-p'+j,'Al pasar '+m+' m',f.pas[j])).join('')+campoT('d-fin','Tiempo final',f.fin,'final-campo')+`</div>
+    ${f.fin&&!f.man?`<p class="ayuda">Cronómetro: ${fmtMs(f.fin)} (milésimas). Se guarda ${fmtT(f.fin)}.</p>`:''}</section>`;
+  if(conPulso(s)){
+    const pu=f.pul||{},pc=(q,lab)=>`<label class="campo" for="d-${q}">${lab}<input id="d-${q}" inputmode="numeric" maxlength="3" value="${pu[q]||''}" ${dis}></label>`;
+    h+=`<section class="panel"><h2>Pulso</h2><p>Pulsaciones por minuto.</p><div class="tiempos">${pc('i','Inicial')}${pc('f','Al llegar')}${pc('m1','A 1 minuto')}${pc('m2','A 2 minutos')}</div></section>`;
+  }
+  h+=`<section class="panel"><label class="campo" for="d-obs">Observación<textarea id="d-obs" maxlength="200" placeholder="Salida nula, técnica, molestia…" ${dis}>${esc(f.obs||'')}</textarea></label>
+    <label class="toggle"><input type="checkbox" id="d-ns" ${f.ns?'checked':''} ${dis}> No se presentó</label></section>`;
+  if(!bloq)h+=`<div class="acciones"><button class="btn" type="button" id="d-cambiar">Cambiar nadador</button><button class="btn peligro" type="button" id="d-borrar">Borrar tiempos</button></div>`;
+  h+=`<button class="btn prim ancho" type="button" id="d-listo">Listo</button>`;
+  $('h-det-c').innerHTML=h;refrescaDetalle(true);
+}
+function refrescaDetalle(soloPar){
+  if($('h-det').hidden)return;
+  const s=serieAct();if(!s)return;const f=fila(s.sid,detC),ps=pasesDe(s);
+  if(!soloPar){   // otro celular cambió algo: se actualizan los campos que no se están escribiendo
+    ps.forEach((m,j)=>{const i=$('d-p'+j);if(i&&document.activeElement!==i&&!i.classList.contains('mal'))i.value=f.pas[j]?digitosATexto(msADigitos(f.pas[j])):''});
+    const i=$('d-fin');if(i&&document.activeElement!==i&&!i.classList.contains('mal'))i.value=f.fin?digitosATexto(msADigitos(f.fin)):'';
+  }
+  let prev=0;
+  ps.forEach((m,j)=>{const p=$('d-p'+j+'-par');if(!p)return;const v=f.pas[j];p.textContent=v&&(j===0||f.pas[j-1])?'parcial '+fmtCs(csDe(v)-prev):'';if(v)prev=csDe(v)});
+  const pf=$('d-fin-par');if(pf)pf.textContent=f.fin&&ps.length&&f.pas[ps.length-1]?'último tramo '+fmtCs(csDe(f.fin)-csDe(f.pas[ps.length-1])):'';
+}
+$('h-det-c').addEventListener('input',e=>{
+  const el=e.target,s=serieAct(),c=detC;if(!s||cerrado())return;
+  if(el.id==='d-fin'||/^d-p\d+$/.test(el.id)){
+    const dig=el.value.replace(/\D/g,'').replace(/^0+/,'').slice(0,7);el.value=digitosATexto(dig);
+    const ms=dig?digitosAMs(dig):null,malo=!!dig&&ms==null;el.classList.toggle('mal',malo);if(malo)return;
+    toca(s.sid,c,x=>{if(el.id==='d-fin')x.fin=ms;else x.pas[+el.id.slice(3)]=ms;x.man=true});refrescaDetalle(true);return;
+  }
+  if(['d-i','d-f','d-m1','d-m2'].includes(el.id)){
+    const v=el.value.replace(/\D/g,'').slice(0,3);el.value=v;const q=el.id.slice(2);
+    toca(s.sid,c,x=>{x.pul=Object.assign({},x.pul);if(v)x.pul[q]=+v;else delete x.pul[q]});return;
+  }
+  if(el.id==='d-obs'){toca(s.sid,c,x=>{x.obs=el.value.slice(0,200)});return}
+  if(el.id==='d-ns'){toca(s.sid,c,x=>{x.ns=el.checked})}
+});
+$('h-det-c').addEventListener('click',e=>{
+  const s=serieAct(),c=detC;
+  if(e.target.id==='d-listo')history.back();
+  if(e.target.id==='d-cambiar'){
+    $('h-det').hidden=true;history.replaceState({v:'serie',sid:s.sid},'');editaSerie(s.sid,false);abreSelector(c);
+  }
+  if(e.target.id==='d-borrar'){
+    const f=fila(s.sid,c),antes=JSON.parse(JSON.stringify(f));
+    toca(s.sid,c,x=>{x.fin=null;x.pas=[];x.man=false});pintaDetalle();
+    aviso('Tiempos del carril '+c+' borrados',()=>{toca(s.sid,c,x=>{x.fin=antes.fin;x.pas=antes.pas;x.man=antes.man});pintaDetalle()});
+  }
+});
+
+/* ---------- arranque ---------- */
+let wake=null;
+async function pidePantalla(){try{if(navigator.wakeLock&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null)}}catch(e){}}
+(function arranque(){
+  if(cfg.id&&abreLocal(cfg.id)&&cfg.juez){
+    const v=VISTAS.includes(cfg.vista)?cfg.vista:'test';
+    history.replaceState({v},'');ir(v==='inicio'?'test':v,cfg.sid,false);leer();if(st.pend.s.length||st.pend.f.length)enviar();pidePantalla();
+  }else{cfg.vista='inicio';history.replaceState({v:'inicio'},'');ir('inicio','',false)}
+})();
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
