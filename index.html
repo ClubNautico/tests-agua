@@ -4,27 +4,38 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#FFFFFF">
+<meta name="theme-color" content="#22409A">
 <title>Tests de agua · Club Náutico</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tests de agua">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
+<!-- Fuentes de la marca sin bloquear: si no hay señal, la página usa las del sistema y el cronómetro funciona igual. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@700&family=Open+Sans:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
 <style>
 /* Tests de agua del Club Náutico. Pantalla de trabajo junto a la piscina, al sol:
-   fondo claro, tinta casi negra, el azul del club solo en las acciones del cronómetro y en los tiempos.
-   Cuadrícula: una columna de 720px como máximo, márgenes de 16px en el teléfono, separación única de 12px. */
+   fondo claro, tinta casi negra, el azul rey del club en las acciones y en los tiempos; Parar en rojo.
+   Marca común: Josefin Slab en títulos, Open Sans en el resto. Bordes de controles a 3:1 o más.
+   Cuadrícula: una columna de 720px como máximo, márgenes de 16px en el teléfono, separación de 12px. */
 :root{
   --ground:#F4F6FB;--surface:#FFFFFF;--raised:#EDF0F7;--active:#E4E9F4;
-  --border:#DDE2EC;--rule:#ECEFF5;--control:#C3CBDA;
+  --border:#DDE2EC;--rule:#ECEFF5;--control:#7C879C;
   --text:#0E1626;--muted:#4D586C;--faint:#5E687B;
   --accent:#22409A;--accent-ink:#1C3480;--accent-soft:#EDF1FC;--accent-track:#D3DCF5;
   --amber:#FFC93C;
   --positive:#1F6E45;--pill-positive-bg:#DCF5E5;--pill-positive-ink:#0B3A20;
-  --negative:#B42318;--pill-negative-bg:#FDEBE8;--pill-negative-ink:#7A1A12;
+  --negative:#B42318;--negative-ink:#8F1C13;--pill-negative-bg:#FDEBE8;--pill-negative-ink:#7A1A12;
   --pill-warning-bg:#FFF6D9;--pill-warning-ink:#7A4A00;--warning-line:#F2D27A;
   --radius-card:8px;--radius-control:6px;
-  --gap:12px;--pad:16px;
-  --font:"DM Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --gap:12px;--pad:16px;--borde:2px;
+  --font:"Open Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --display:"Josefin Slab","Roboto Slab",Rockwell,Georgia,serif;
+  --barra-h:53px;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -34,8 +45,8 @@ body{margin:0;background:var(--ground);color:var(--text);font:16px/1.45 var(--fo
 button,input,textarea{font:inherit;color:inherit}
 button{cursor:pointer;touch-action:manipulation}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-h1{font-size:24px;line-height:1.2;font-weight:700;margin:0;letter-spacing:-.01em}
-h2{font-size:17px;line-height:1.3;font-weight:600;margin:0}
+h1{font-family:var(--display);font-size:28px;line-height:1.15;font-weight:700;margin:0}
+h2{font-family:var(--display);font-size:22px;line-height:1.2;font-weight:700;margin:0}
 p{margin:0}
 .num{font-variant-numeric:tabular-nums}
 
@@ -51,6 +62,8 @@ p{margin:0}
 .sync.env{background:var(--accent-soft);color:var(--accent-ink)}
 .sync.cola{background:var(--pill-warning-bg);color:var(--pill-warning-ink)}
 .sync.mal{background:var(--pill-negative-bg);color:var(--pill-negative-ink)}
+.srv{background:var(--pill-negative-bg);color:var(--pill-negative-ink);border-top:1px solid #F3B8B0;font-size:14px;font-weight:600;line-height:1.35}
+.srv p{max-width:720px;margin:0 auto;padding:8px max(16px,env(safe-area-inset-right,0px)) 8px max(16px,env(safe-area-inset-left,0px))}
 
 .lienzo{max-width:720px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));display:grid;gap:var(--gap)}
 .lienzo>*{min-width:0}
@@ -59,8 +72,8 @@ p{margin:0}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--pad);display:grid;gap:12px}
 .panel h2+p{color:var(--muted);font-size:14px;margin-top:-6px}
 label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
-.campo input,.campo textarea{width:100%;min-height:48px;border:1px solid var(--control);border-radius:var(--radius-control);background:var(--surface);padding:8px 12px;font-size:17px;font-weight:500}
-.campo textarea{min-height:76px;resize:vertical;font-size:16px}
+.campo input,.campo textarea{width:100%;min-height:48px;border:var(--borde) solid var(--control);border-radius:var(--radius-control);background:var(--surface);padding:8px 12px;font-size:17px;font-weight:600}
+.campo textarea{min-height:76px;resize:vertical;font-size:16px;font-weight:400}
 .campo input::placeholder,.campo textarea::placeholder{color:var(--faint);font-weight:400}
 .campo input:focus,.campo textarea:focus{outline:3px solid var(--accent-track);border-color:var(--accent)}
 .campo input.mal{border-color:var(--negative);background:var(--pill-negative-bg)}
@@ -70,25 +83,32 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
 .fila>*{min-width:0}
 
 /* botones: un relleno azul por pantalla para la tarea principal */
-.btn{min-height:48px;border-radius:var(--radius-control);border:1px solid var(--control);background:var(--surface);padding:8px 16px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn{min-height:48px;border-radius:var(--radius-control);border:var(--borde) solid var(--control);background:var(--surface);padding:8px 16px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn:active{background:var(--raised)}
 .btn.prim{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
 .btn.prim:active{background:var(--accent-ink)}
-.btn.texto{border-color:transparent;background:transparent;color:var(--accent);padding-inline:6px;min-height:44px}
+.btn.texto{border-color:transparent;background:transparent;color:var(--accent);padding-inline:6px;min-height:48px}
 .btn.texto:active{background:var(--accent-soft)}
 .btn.peligro{color:var(--negative)}
 .btn:disabled{opacity:.55;cursor:default}
 .btn.ancho{width:100%}
-.acciones{display:flex;gap:10px;flex-wrap:wrap}
+.acciones{display:flex;gap:12px;flex-wrap:wrap}
 .acciones .btn{flex:1 1 140px}
 
 /* inicio */
-.id-grande{font-size:26px;font-weight:700;letter-spacing:.01em;color:var(--accent-ink);overflow-wrap:anywhere}
+.id-grande{font-family:var(--font);font-size:26px;font-weight:700;letter-spacing:.01em;color:var(--accent-ink);overflow-wrap:anywhere}
 .reciente{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;padding:8px 0}
 .reciente:first-of-type{border-top:0}
 .reciente b{display:block;font-weight:600}
 .reciente small{display:block;color:var(--muted);font-size:13px}
 .reciente svg{margin-left:auto;flex:none;color:var(--muted)}
+details.prof{display:block;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:0 var(--pad)}
+details.prof>summary{list-style:none;cursor:pointer;min-height:56px;display:flex;align-items:center;gap:12px;font-weight:600;font-size:16px;color:var(--accent-ink)}
+details.prof>summary::-webkit-details-marker{display:none}
+details.prof>summary span{flex:1}
+details.prof>summary::after{content:"";flex:none;width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin:0 6px 4px 0}
+details.prof[open]>summary::after{transform:rotate(-135deg);margin-bottom:-4px}
+details.prof .dentro{display:grid;gap:12px;padding:4px 0 var(--pad)}
 
 /* lista de series */
 .pill{display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:2px 9px;border-radius:999px;background:var(--raised);color:var(--muted);white-space:nowrap}
@@ -102,19 +122,19 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
 .serie-f:first-child{border-top:0}
 .serie-f:active{background:var(--raised)}
 .serie-f .q{font-weight:600}
-.serie-f .q span{color:var(--muted);font-weight:500}
+.serie-f .q span{color:var(--muted);font-weight:400}
 .serie-f .quienes{grid-column:1;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .serie-f .cuantos{grid-row:1/3;grid-column:2;text-align:right;font-size:14px;color:var(--muted)}
 .serie-f .cuantos b{display:block;font-size:17px;color:var(--text)}
-.vacio{border:1px dashed var(--control);border-radius:var(--radius-card);padding:16px;color:var(--muted);font-size:15px}
-.aviso-caja{background:var(--pill-warning-bg);border:1px solid var(--warning-line);color:var(--pill-warning-ink);border-radius:var(--radius-card);padding:12px 14px;font-size:14px;font-weight:500;display:grid;gap:10px}
+.vacio{border:var(--borde) dashed var(--control);border-radius:var(--radius-card);padding:16px;color:var(--muted);font-size:15px}
+.aviso-caja{background:var(--pill-warning-bg);border:1px solid var(--warning-line);color:var(--pill-warning-ink);border-radius:var(--radius-card);padding:12px 14px;font-size:14px;font-weight:600;display:grid;gap:10px}
 
 /* armar serie */
 .grupo-op{display:grid;gap:8px}
 .grupo-op>span{font-size:14px;font-weight:600}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips button{min-height:44px;min-width:52px;padding:6px 14px;border-radius:var(--radius-control);border:1px solid var(--control);background:var(--surface);font-weight:600;font-size:15px}
-.chips button[aria-pressed=true]{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink);box-shadow:inset 0 0 0 1px var(--accent)}
+.chips button{min-height:48px;min-width:52px;padding:6px 14px;border-radius:var(--radius-control);border:var(--borde) solid var(--control);background:var(--surface);font-weight:600;font-size:15px}
+.chips button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
 .chips button:disabled{opacity:.45}
 .carril-f{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;padding:6px 0}
 .carril-f:first-child{border-top:0}
@@ -139,22 +159,19 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
 .chips.desliza::-webkit-scrollbar{display:none}
 .chips.desliza button{flex:none}
 
-/* cronómetro */
-.reloj{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:12px var(--pad);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px}
+/* cronómetro: reloj fijo arriba, carriles, barra inferior fija con el último toque y Deshacer */
+#v-crono{padding-bottom:calc(104px + env(safe-area-inset-bottom,0px))}
+.reloj{position:sticky;top:var(--barra-h);z-index:5;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:10px var(--pad);display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px 12px;box-shadow:0 1px 0 var(--ground),0 -8px 0 var(--ground)}
 .reloj .t{font-size:clamp(28px,9.2vw,44px);line-height:1;font-weight:700;letter-spacing:-.02em;color:var(--text);white-space:nowrap}
 .reloj.corre .t{color:var(--accent-ink)}
-.reloj .que{grid-column:1/-1;display:flex;align-items:center;gap:8px;min-height:36px;color:var(--muted);font-size:14px}
-.reloj .que span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.reloj .que.msg span{color:var(--text);font-weight:600}
-.reloj .que button{flex:none;min-height:36px;padding:0 12px;border-radius:var(--radius-control);border:1px solid var(--control);background:var(--surface);color:var(--accent);font-weight:700}
 .salida{min-width:112px;min-height:60px;font-size:19px;font-weight:700;border-radius:var(--radius-control);border:0;background:var(--accent);color:#FFFFFF;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .salida:active{background:var(--accent-ink)}
-.salida.sec{background:var(--surface);color:var(--negative);border:1px solid var(--control);font-size:15px;font-weight:600;min-height:48px}
+.salida.sec{background:var(--surface);color:var(--negative);border:var(--borde) solid var(--control);font-size:15px;font-weight:600;min-height:48px}
 .salida.sec.arma{background:var(--pill-negative-bg);border-color:var(--negative)}
 .mis{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
-.mis>span{white-space:nowrap}
-.mis .chips{gap:6px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
-.mis .chips button{min-width:44px;min-height:40px;padding:4px 8px;font-size:15px}
+.mis>span{white-space:nowrap;font-weight:600}
+.mis .chips{gap:8px;flex-wrap:wrap}
+.mis .chips button{min-width:48px;min-height:48px;padding:4px 8px;font-size:16px}
 .carriles{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);overflow:hidden}
 .ln{display:grid;grid-template-columns:32px minmax(0,1fr) auto;align-items:center;gap:4px 10px;padding:8px 12px;border-top:1px solid var(--rule);min-height:72px}
 .ln:first-child{border-top:0}
@@ -167,79 +184,98 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
 .pista{display:flex;gap:3px;height:6px}
 .pista i{flex:1;border-radius:2px;background:var(--accent-track)}
 .pista i.on{background:var(--accent)}
-.ln .bts{display:flex;gap:8px}
+.ln .bts{display:flex;gap:16px}
 .ln .bts button{min-height:56px;border-radius:var(--radius-control);font-weight:700;font-size:16px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-.b-pase{min-width:72px;border:2px solid var(--accent);background:var(--surface);color:var(--accent-ink)}
-.b-pase:active{background:var(--accent-soft)}
-.b-parar{min-width:80px;border:0;background:var(--accent);color:#FFFFFF}
-.b-parar:active{background:var(--accent-ink)}
+.b-pase{min-width:72px;border:0;background:var(--accent);color:#FFFFFF}
+.b-pase:active{background:var(--accent-ink)}
+.b-parar{min-width:80px;border:0;background:var(--negative);color:#FFFFFF}
+.b-parar:active{background:var(--negative-ink)}
 .b-parar.solo{min-width:120px}
 .b-hueco{min-width:72px}
 .ln .final{text-align:right;border:0;background:transparent;padding:4px 0 4px 8px;min-height:56px}
 .ln .final b{display:block;font-size:22px;font-weight:700;color:var(--accent-ink)}
 .ln .final small{color:var(--accent);font-weight:600;font-size:13px}
-.ln.ajeno{min-height:52px;color:var(--muted)}
-.ln.ajeno .n{background:transparent;border:1px solid var(--border);color:var(--muted)}
-.ln.ajeno .info b{font-weight:500;color:var(--muted)}
+.ln.ajeno{min-height:56px;color:var(--muted)}
+.ln.ajeno .n{background:transparent;border:1px solid var(--control);color:var(--muted)}
+.ln.ajeno .info b{font-weight:400;color:var(--muted)}
 .pulso{color:var(--pill-warning-ink);background:var(--pill-warning-bg);border-radius:4px;padding:0 6px;font-weight:600}
 .pulso.ya{color:var(--pill-negative-ink);background:var(--pill-negative-bg)}
 .compacto{gap:8px}
 .compacto .titulo{padding:0}
-.compacto .titulo h1{font-size:20px}
+.compacto .titulo h1{font-size:22px}
 .compacto .titulo .sub{display:none}
 .compacto .reloj{padding:8px 12px;gap:4px 12px}
-.compacto .ln{min-height:52px;padding:3px 10px}
+.compacto .ln{min-height:64px;padding:4px 10px}
 .compacto .ln .info{padding:2px 0;gap:1px}
 .compacto .ln .info b{-webkit-line-clamp:1}
 .compacto .pista{display:none}
-.compacto .ln .bts button,.compacto .ln .final{min-height:46px}
 .compacto .reloj .t{font-size:clamp(26px,8.6vw,38px)}
-.compacto .salida{min-height:50px}
-.compacto .mis .chips button{min-width:38px;min-height:38px}
+.compacto .salida{min-height:56px}
+.abajo{position:fixed;left:0;right:0;bottom:0;z-index:15;background:var(--text);color:#FFFFFF;padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));box-shadow:0 -4px 16px rgba(14,22,38,.18)}
+.abajo-in{max-width:720px;margin:0 auto;display:flex;align-items:center;gap:12px;min-height:56px}
+.abajo span{flex:1;min-width:0;font-size:15px;line-height:1.3;color:#D7DDEA;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.abajo.msg span{color:#FFFFFF;font-weight:600}
+.abajo button{flex:none;min-height:48px;min-width:112px;border:2px solid var(--amber);background:transparent;color:var(--amber);font-weight:700;font-size:16px;border-radius:var(--radius-control)}
+.abajo button:active{background:rgba(255,201,60,.16)}
 
 /* detalle de un carril */
-.tiempos{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px}
+.tiempos{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:12px;align-items:start}
+.tiempos .campo{grid-template-rows:auto auto 18px}
 .tiempos .campo input{text-align:center;font-size:20px;font-weight:700}
-.tiempos .par{font-size:13px;color:var(--muted);text-align:center;font-weight:400}
+.tiempos .par{font-size:13px;color:var(--muted);text-align:center;font-weight:400;min-height:18px;line-height:18px}
 .final-campo input{background:var(--accent-soft);border-color:var(--accent)}
 .toggle{display:flex;align-items:center;gap:12px;min-height:48px;font-weight:600}
 .toggle input{width:24px;height:24px;accent-color:var(--accent)}
 
-/* aviso flotante con deshacer */
-.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--text);color:#FFFFFF;border-radius:var(--radius-card);padding:6px 6px 6px 14px;display:flex;align-items:center;gap:8px;font-weight:500;font-size:15px;width:max-content;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(14,22,38,.22)}
+/* aviso flotante con deshacer (fuera del cronómetro) */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:30;background:var(--text);color:#FFFFFF;border-radius:var(--radius-card);padding:6px 6px 6px 14px;display:flex;align-items:center;gap:8px;font-weight:600;font-size:15px;width:max-content;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(14,22,38,.22)}
 .toast span{padding:8px 0}
-.toast button{border:0;background:transparent;color:var(--amber);font-weight:700;min-height:40px;padding:0 10px;border-radius:var(--radius-control)}
+.toast button{border:2px solid var(--amber);background:transparent;color:var(--amber);font-weight:700;min-height:48px;padding:0 14px;border-radius:var(--radius-control);flex:none}
 
+@media (max-width:360px){
+  .ln{grid-template-columns:28px minmax(0,1fr) auto;gap:4px 8px;padding-left:8px;padding-right:8px}
+  .ln .n{width:28px;height:28px;font-size:16px}
+  .b-pase,.b-hueco{min-width:64px}
+  .b-parar{min-width:72px}
+  .b-parar.solo{min-width:104px}
+  .salida{min-width:100px}
+}
 @media (min-width:700px){
   .lienzo{padding-top:24px;gap:16px}
-  .doble{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
   .reloj .t{font-size:46px}
 }
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
 <header class="barra" id="barra"><div class="barra-in">
   <button class="volver" id="btn-volver" type="button" aria-label="Volver" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div class="marca"><svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect width="26" height="26" rx="6" fill="#22409A"/><path d="M5 9h16M5 13h16M5 17h16" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-dasharray="2.2 2.2"/><circle cx="9" cy="9" r="1.8" fill="#FFC93C"/><circle cx="17" cy="13" r="1.8" fill="#FFC93C"/><circle cx="12" cy="17" r="1.8" fill="#FFC93C"/></svg><span id="t-barra">Tests de agua</span></div>
+  <div class="marca"><svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0E7C86"/><path d="M17 13h30v8H36v21h-8V21H17z" fill="#FFFFFF"/><path d="M13 51c4.5-4.5 8.5-4.5 13 0s8.5 4.5 13 0 8.5-4.5 13 0" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round"/></svg><span id="t-barra">Club Náutico</span></div>
   <span class="sync" id="sync" role="status" hidden>Guardado</span>
-</div></header>
+</div>
+<div class="srv" id="srv" role="alert" hidden><p>No se cargó la conexión con el servidor. Tus tiempos quedan guardados en este celular y se envían solos cuando vuelva; la página lo reintenta sola.</p></div>
+</header>
 
 <!-- ================= INICIO ================= -->
 <main class="lienzo" id="v-inicio" hidden>
-  <div class="titulo"><h1>Tests de agua</h1><p class="sub">Club Náutico · Toma de tiempos, pases y pulso en la piscina</p></div>
-  <div class="doble">
-    <form class="panel" id="f-entrar" autocomplete="off" novalidate>
-      <h2>Entrar a un test</h2>
-      <p>Escribe el ID que te pasó el profesor.</p>
-      <label class="campo" for="e-nombre">Tu nombre<input id="e-nombre" maxlength="40" autocapitalize="words" required></label>
-      <label class="campo" for="e-id">ID del test<input id="e-id" maxlength="40" placeholder="2026-11-09-RICARDO-482" autocapitalize="characters" autocorrect="off" spellcheck="false" required></label>
-      <p class="error" id="e-error" role="alert" hidden></p>
-      <button class="btn prim ancho" id="e-btn" type="submit">Entrar</button>
-    </form>
-    <div class="panel" id="p-crear">
+  <div class="titulo"><h1>Tests de agua</h1><p class="sub">Toma de tiempos, pases y pulso en la piscina</p></div>
+  <form class="panel" id="f-entrar" autocomplete="off" novalidate>
+    <h2>Entrar a un test</h2>
+    <p>Escribe tu nombre y el ID que te pasó el profesor.</p>
+    <label class="campo" for="e-nombre">Tu nombre<input id="e-nombre" maxlength="40" autocapitalize="words" required></label>
+    <label class="campo" for="e-id">ID del test<input id="e-id" maxlength="40" placeholder="2026-11-09-RICARDO-482915" autocapitalize="characters" autocorrect="off" spellcheck="false" required></label>
+    <p class="error" id="e-error" role="alert" hidden></p>
+    <button class="btn prim ancho" id="e-btn" type="submit">Entrar</button>
+  </form>
+  <section class="panel" id="recientes" hidden>
+    <h2>Tests en este celular</h2>
+    <div id="l-recientes"></div>
+  </section>
+  <details class="prof" id="p-crear">
+    <summary><span>Soy el profesor: crear un test</span></summary>
+    <div class="dentro">
       <form id="f-crear" autocomplete="off" novalidate style="display:grid;gap:12px">
-        <h2>Crear un test</h2>
-        <p>Se crea el ID con la fecha y el profesor. Las pruebas y series se arman en la piscina.</p>
+        <p class="ayuda">Se crea el ID con la fecha y tu nombre. Pide la contraseña del club; no la escribas en un celular ajeno. Las pruebas y series se arman en la piscina.</p>
         <label class="campo" for="c-fecha">Fecha del test<input id="c-fecha" type="date" required></label>
         <label class="campo" for="c-prof">Profesor que toma el test<input id="c-prof" maxlength="40" autocapitalize="words" required></label>
         <label class="campo" for="c-clave">Contraseña del club<input id="c-clave" type="password" maxlength="40" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" required></label>
@@ -255,11 +291,7 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
         <button class="btn texto" id="c-otro" type="button">Crear otro test</button>
       </div>
     </div>
-  </div>
-  <section class="panel" id="recientes" hidden>
-    <h2>Tests en este celular</h2>
-    <div id="l-recientes"></div>
-  </section>
+  </details>
 </main>
 
 <!-- ================= TEST ================= -->
@@ -268,12 +300,18 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
   <div class="resumen" id="t-resumen"></div>
   <div class="aviso-caja" id="t-cerrado" hidden>
     <p>Este test está cerrado. Para corregir algo, reábrelo con la contraseña del club.</p>
-    <div class="fila"><label class="campo" for="r-clave" style="flex:1">Contraseña del club<input id="r-clave" type="password" maxlength="40" autocomplete="off"></label></div>
+    <label class="campo" for="r-clave">Contraseña del club<input id="r-clave" type="password" maxlength="40" autocomplete="off"></label>
     <p class="error" id="r-error" hidden></p>
     <button class="btn" id="r-btn" type="button">Reabrir test</button>
   </div>
   <button class="btn prim ancho" id="t-nueva" type="button">Nueva serie</button>
   <div id="t-series"></div>
+  <div class="aviso-caja" id="t-cc" hidden>
+    <p>Para cerrar el test desde este celular escribe la contraseña del club. El celular que creó el test lo cierra sin contraseña.</p>
+    <label class="campo" for="cc-clave">Contraseña del club<input id="cc-clave" type="password" maxlength="40" autocomplete="off"></label>
+    <p class="error" id="cc-error" hidden></p>
+    <button class="btn" id="cc-btn" type="button">Cerrar test</button>
+  </div>
   <div class="acciones">
     <button class="btn" id="t-copiar" type="button">Copiar ID</button>
     <button class="btn" id="t-cerrar" type="button">Cerrar test</button>
@@ -304,7 +342,6 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
   <section class="reloj" id="k-reloj" aria-label="Cronómetro de la serie">
     <div class="t" id="k-t" aria-live="off">00:00.000</div>
     <button class="salida" id="k-salida" type="button">Salida</button>
-    <div class="que"><span id="k-que" role="status"></span><button id="k-desh" type="button" hidden>Deshacer</button></div>
   </section>
   <div class="mis" id="k-mis"></div>
   <section class="carriles" id="k-lanes" aria-label="Carriles"></section>
@@ -313,6 +350,7 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
     <button class="btn" id="k-sig" type="button">Siguiente serie, mismos nadadores</button>
   </div>
 </main>
+<div class="abajo" id="k-abajo" hidden><div class="abajo-in"><span id="k-msg" role="status"></span><button id="k-desh" type="button" hidden>Deshacer</button></div></div>
 
 <!-- ================= HOJA: ELEGIR NADADOR ================= -->
 <section class="hoja" id="h-nad" hidden aria-label="Elegir nadador">
@@ -341,14 +379,16 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
 
 <div class="toast" id="toast" role="status" hidden><span id="toast-t"></span><button id="toast-b" type="button" hidden>Deshacer</button></div>
 
-<script src="config.js?v=1"></script>
+<script src="config.js?v=2"></script>
 <script>
 'use strict';
-const API=(window.CONFIG&&window.CONFIG.api)||'';
+let API=(window.CONFIG&&window.CONFIG.api)||'';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const load=(k,d)=>{try{const v=JSON.parse(localStorage.getItem(k));return v==null?d:v}catch(e){return d}};
-const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let faltaMemoria=false;
+const store=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){if(!faltaMemoria){faltaMemoria=true;setTimeout(()=>aviso('El celular no pudo guardar en su memoria. No cierres la página hasta que diga Guardado.'),0)}return false}};
+const enviaForm=f=>{if(typeof f.requestSubmit==='function')f.requestSubmit();else f.dispatchEvent(new Event('submit',{cancelable:true}))};
 
 /* ---------- pruebas ---------- */
 const PRUEBAS={15:['Frente','Espalda','Pecho'],25:['Libre','Espalda','Pecho','Mariposa'],50:['Libre','Espalda','Pecho','Mariposa'],
@@ -358,11 +398,10 @@ const nombrePrueba=p=>p===15?'15 m salida':p+' m';
 const opPases=p=>[25,50,100,200].filter(i=>i<p&&p%i===0);
 const pasesDef=p=>{const o=opPases(p);if(!o.length)return 0;if(p<=100)return 25;if(p===200)return 50;return 100};
 const pasesDe=s=>{const a=[];if(s.pases)for(let m=s.pases;m<s.prueba;m+=s.pases)a.push(m);return a};
-const carrilesDef=p=>p>=400?8:4;
 const conPulso=s=>s.prueba>=400;
 
 /* ---------- tiempos ---------- */
-const csDe=ms=>Math.floor(ms/10);               // centésimas sin redondear hacia arriba
+const csDe=ms=>Math.floor(ms/10);               // centésimas truncadas: 32.999 -> 32.99
 function fmtCs(c){const p=n=>String(n).padStart(2,'0');const m=Math.floor(c/6000),s=Math.floor(c%6000/100),cc=c%100;return m?m+':'+p(s)+'.'+p(cc):s+'.'+p(cc)}
 const fmtT=ms=>ms==null?'':fmtCs(csDe(ms));
 function fmtMs(ms){const v=Math.max(0,Math.floor(ms)),m=Math.floor(v/60000),s=Math.floor(v%60000/1000),mi=v%1000;return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0')+'.'+String(mi).padStart(3,'0')}
@@ -370,19 +409,39 @@ function digitosATexto(d){if(d.length<=2)return d;const cc=d.slice(-2),r=d.slice
 function digitosAMs(d){if(d.length<3)return null;const cc=+d.slice(-2),r=d.slice(0,-2),s=+r.slice(-2),m=r.length>2?+r.slice(0,-2):0;if(s>59||m>59)return null;const t=(m*6000+s*100+cc)*10;return t>0?t:null}
 const msADigitos=ms=>ms==null?'':fmtCs(csDe(ms)).replace(/\D/g,'');   // 7:06.83 -> 70683, lo que se teclearía
 
+/* ---------- relojes ----------
+   Cada toque guarda dos horas: la del reloj de alta precisión (p) y la del sistema (d).
+   T0 es el origen del reloj de precisión; si el navegador no da timeOrigin (iOS 14 o anterior) se usa navigationStart. */
+const T0=(()=>{const o=performance.timeOrigin;if(typeof o==='number'&&isFinite(o)&&o>0)return o;
+  try{const n=performance.timing&&performance.timing.navigationStart;if(n>0)return n}catch(e){}return Date.now()-performance.now()})();
+function horaDe(e){
+  const aP=performance.now(),aD=Date.now();let ts=e&&typeof e.timeStamp==='number'&&isFinite(e.timeStamp)&&e.timeStamp>0?e.timeStamp:null;
+  if(ts==null)return{p:aP,d:aD};
+  if(ts>1e12)return{p:ts-T0,d:ts};          // navegadores viejos: timeStamp en hora del sistema
+  if(ts>aP)ts=aP;
+  return{p:ts,d:aD-(aP-ts)};
+}
+// Milisegundos desde la salida c hasta el toque h. Si el teléfono se durmió, el reloj de precisión pudo pausarse: entonces manda el del sistema.
+function msEn(c,h){
+  const p=(T0+h.p)-c.p,d=h.d-c.d;
+  const v=isFinite(p)&&isFinite(d)&&Math.abs(p-d)<=500?p:(isFinite(d)?d:p);
+  return isFinite(v)?v:null;
+}
+
 /* ---------- estado ---------- */
 let cfg=load('ta_cfg',{juez:'',id:'',vista:'inicio',sid:'',recientes:[]});
 let st=null;            // el test abierto: {id,test,series,filas,padron,pend:{s:[],f:[]}}
 let cro={};             // salidas de este celular: sid -> {p,d}
 let mis={};             // carriles que toma este celular: sid -> [c]
-let inflight=false,sinRed=false,tSave=null;
+let inflight=false,leyendo=false,sinRed=false,tSave=null,errSrv='';
 const avisados={};      // carriles ajenos ya avisados
 const guardaCfg=()=>store('ta_cfg',cfg);
 const guardaSt=()=>{if(st){store('ta_t_'+st.id,st);store('ta_c_'+st.id,cro);store('ta_m_'+st.id,mis)}};
-function abreLocal(id){st=load('ta_t_'+id,null);cro=load('ta_c_'+id,{});mis=load('ta_m_'+id,{});return st}
+function abreLocal(id){st=load('ta_t_'+id,null);cro=load('ta_c_'+id,{});mis=load('ta_m_'+id,{});if(st&&!st.pend)st.pend={s:[],f:[]};return st}
+const pendientes=()=>st?st.pend.s.length+st.pend.f.length:0;
 
 const kDe=(sid,c)=>sid+'|'+c;
-const filaNueva=(sid,c)=>({k:kDe(sid,c),sid,c,nid:'',nom:'',pend:false,ns:false,fin:null,pas:[],man:false,pul:{},obs:'',juez:'',ts:0});
+const filaNueva=(sid,c)=>({k:kDe(sid,c),sid,c,nid:'',nom:'',pend:false,ns:false,fin:null,pas:[],man:false,pul:{},obs:'',juez:'',ts:0,tf:{}});
 const fila=(sid,c)=>st.filas[kDe(sid,c)]||filaNueva(sid,c);
 const seriesVivas=()=>Object.values(st.series).filter(s=>!s.borrada).sort((a,b)=>a.n-b.n);
 const lanesDe=s=>{const r=[];for(let c=1;c<=s.carriles;c++)r.push(fila(s.sid,c));return r};
@@ -394,14 +453,27 @@ const nadador=id=>st.padron.find(n=>n.id===id);
 // Nombre corto para las filas del cronómetro; conserva lo que distingue a homónimos: "Hugo E. (papá)".
 const corto=f=>{if(!f.nom)return '';const ex=(f.nom.match(/\(.*\)/)||[''])[0],p=f.nom.replace(/\(.*\)/,'').trim().split(/\s+/);return (p.length>1?p[0]+' '+p[1].charAt(0)+'.':p[0])+(ex?' '+ex:'')};
 
+// Cada dato de un carril lleva su propia hora de cambio (tf). Así el servidor junta lo que hicieron dos celulares
+// en el mismo carril campo por campo (pases, pulso, final, observación) en vez de quedarse con la fila entera del último.
+function firma(f){
+  const pu=f.pul||{},o={nad:[f.nid||'',f.nom||'',!!f.pend],ns:!!f.ns,fin:f.fin==null?null:f.fin,man:!!f.man,obs:f.obs||'',
+    pi:pu.i||null,pf:pu.f||null,pm1:pu.m1||null,pm2:pu.m2||null};
+  (f.pas||[]).forEach((v,j)=>{o['p'+j]=v||null});return o;
+}
 function toca(sid,c,cambio,rapido){
-  const f=JSON.parse(JSON.stringify(fila(sid,c)));
-  cambio(f);f.juez=cfg.juez;f.ts=Date.now();
+  const f=JSON.parse(JSON.stringify(fila(sid,c))),a=firma(f);
+  cambio(f);
+  const b=firma(f),ahora=Date.now();f.tf=Object.assign({},f.tf||{});
+  Object.keys(Object.assign({},a,b)).forEach(k=>{
+    const va=a[k]===undefined?null:a[k],vb=b[k]===undefined?null:b[k];
+    if(JSON.stringify(va)!==JSON.stringify(vb))f.tf[k]=Math.max(ahora,(f.tf[k]||f.ts||0)+1);
+  });
+  f.juez=cfg.juez;f.ts=Math.max(ahora,(f.ts||0)+1);
   st.filas[f.k]=f;if(!st.pend.f.includes(f.k))st.pend.f.push(f.k);
   guardaSt();pintaSync();programa(rapido?250:700);
 }
 function tocaSerie(s){
-  s.juez=cfg.juez;s.ts=Date.now();st.series[s.sid]=s;
+  s.juez=cfg.juez;s.ts=Math.max(Date.now(),(s.ts||0)+1);st.series[s.sid]=s;
   if(!st.pend.s.includes(s.sid))st.pend.s.push(s.sid);
   guardaSt();pintaSync();programa(500);
 }
@@ -420,27 +492,41 @@ function intentos(){
 /* ---------- red ---------- */
 async function llamar(cuerpo){
   if(!API)throw new Error('sin api');
-  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),30000);
+  const ctl=typeof AbortController==='function'?new AbortController():null,to=setTimeout(()=>ctl&&ctl.abort(),30000);
   try{
-    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(cuerpo),signal:ctl.signal,redirect:'follow'});
+    const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(cuerpo),signal:ctl?ctl.signal:undefined,redirect:'follow'});
     return await r.json();
   }finally{clearTimeout(to)}
 }
+// Si config.js no cargó (bloqueo, error, caché vieja), se reintenta solo; los pendientes NO se tocan.
+function cargaConfig(){
+  if(API)return;
+  const sc=document.createElement('script');sc.src='config.js?r='+Date.now();
+  sc.onload=()=>{sc.remove();const a=window.CONFIG&&window.CONFIG.api;if(a&&!API){API=a;sinRed=false;pintaSrv();pintaSync();enviar();leer()}};
+  sc.onerror=()=>sc.remove();
+  document.head.appendChild(sc);
+}
+function pintaSrv(){$('srv').hidden=!!API;midebarra()}
+function midebarra(){try{document.documentElement.style.setProperty('--barra-h',$('barra').offsetHeight+'px')}catch(e){}}
+window.addEventListener('resize',midebarra);
+setInterval(cargaConfig,15000);
 function aplicar(r){
   if(!r||!st)return;
   if(r.test)st.test=r.test;
   if(r.padron&&r.padron.length)st.padron=r.padron;
   (r.series||[]).forEach(s=>{
     if(st.pend.s.includes(s.sid))return;
-    const lo=st.series[s.sid];if(lo&&lo.ts>=s.ts)return;
+    const lo=st.series[s.sid];if(lo&&lo.ts>s.ts)return;
     st.series[s.sid]=s;
   });
   const choques=[];
   (r.filas||[]).forEach(f=>{
-    if(st.pend.f.includes(f.k))return;
-    const lo=st.filas[f.k];if(lo&&lo.ts>=f.ts)return;
+    if(!f||!f.k||st.pend.f.includes(f.k))return;
+    const lo=st.filas[f.k];if(lo&&lo.ts>f.ts)return;
+    if(lo&&JSON.stringify(lo)===JSON.stringify(f))return;
     const s=st.series[f.sid];
-    if(s&&f.juez&&f.juez!==cfg.juez&&esMio(s,f.c)&&(f.fin||f.pas.some(Boolean))&&cro[f.sid]&&!avisados[f.k]){avisados[f.k]=1;choques.push('Carril '+f.c+': '+f.juez+' también le tomó tiempo. Quedó el último registro.')}
+    if(s&&f.juez&&f.juez!==cfg.juez&&esMio(s,f.c)&&(f.fin||(f.pas||[]).some(Boolean))&&cro[f.sid]&&!avisados[f.k]){avisados[f.k]=1;choques.push('Carril '+f.c+': '+f.juez+' también le tomó tiempo. Queda el dato más reciente de cada uno.')}
+    if(!Array.isArray(f.pas))f.pas=[];if(!f.pul)f.pul={};
     st.filas[f.k]=f;
   });
   guardaSt();
@@ -448,48 +534,52 @@ function aplicar(r){
   repinta();
 }
 async function enviar(){
-  if(!st||inflight)return;
-  if(!API){st.pend={s:[],f:[]};guardaSt();pintaSync();return}
-  const S=st.pend.s.slice(),F=st.pend.f.slice();
-  if(!S.length&&!F.length)return;
+  if(!st)return;
+  if(!API){pintaSync();return}                  // sin servidor: se conservan los pendientes
+  if(inflight||leyendo){programa(400);return}
+  const S=st.pend.s.filter(k=>st.series[k]),F=st.pend.f.filter(k=>st.filas[k]);
+  if(!S.length&&!F.length){st.pend={s:[],f:[]};pintaSync();return}
   const snapS={},snapF={};
   const series=S.map(k=>{snapS[k]=st.series[k].ts;return st.series[k]});
   const filas=F.map(k=>{snapF[k]=st.filas[k].ts;return st.filas[k]});
   inflight=true;pintaSync();
-  let otraVez=false;
+  let otraVez=false,espera=300;
   try{
     const r=await llamar({accion:'guardar',id:st.id,juez:cfg.juez,series,filas});
     if(r.ok){
-      sinRed=false;
-      st.pend.s=st.pend.s.filter(k=>st.series[k].ts!==snapS[k]);
-      st.pend.f=st.pend.f.filter(k=>st.filas[k].ts!==snapF[k]);
-      guardaSt();aplicar(r);otraVez=st.pend.s.length||st.pend.f.length;
-    }else if(r.error==='cerrado'){sinRed=false;aplicar(r)}
-    else{sinRed=true;otraVez=true}
-  }catch(e){sinRed=true;otraVez=true}
+      sinRed=false;errSrv='';
+      st.pend.s=st.pend.s.filter(k=>!(k in snapS)||st.series[k].ts!==snapS[k]);
+      st.pend.f=st.pend.f.filter(k=>!(k in snapF)||st.filas[k].ts!==snapF[k]);
+      guardaSt();inflight=false;aplicar(r);otraVez=pendientes()>0;
+    }else if(r.error==='cerrado'){sinRed=false;inflight=false;aplicar(r)}
+    else if(r.error==='id'||r.error==='bloqueado'){sinRed=false;errSrv=r.error;otraVez=true;espera=60000}
+    else{sinRed=true;otraVez=true;espera=8000}
+  }catch(e){sinRed=true;otraVez=true;espera=8000}
   inflight=false;pintaSync();
-  if(otraVez)setTimeout(enviar,sinRed?8000:300);
+  if(otraVez)setTimeout(enviar,espera);
 }
 async function leer(){
-  if(!st||!API||inflight||document.hidden||cfg.vista==='inicio')return;
-  if(st.pend.s.length||st.pend.f.length){enviar();return}
-  try{const r=await llamar({accion:'leer',id:st.id});if(r.ok){sinRed=false;aplicar(r)}else if(r.error==='id'){sinRed=false}}
+  if(!st||!API||inflight||leyendo||document.hidden||cfg.vista==='inicio')return;
+  if(pendientes()){enviar();return}
+  leyendo=true;
+  try{const r=await llamar({accion:'leer',id:st.id});leyendo=false;if(r.ok){sinRed=false;errSrv='';aplicar(r)}else if(r.error==='id'){sinRed=false}}
   catch(e){sinRed=true}
-  pintaSync();
+  leyendo=false;pintaSync();
 }
 function pintaSync(){
   const el=$('sync');if(!st||cfg.vista==='inicio'){el.hidden=true;return}
-  el.hidden=false;const n=st.pend.s.length+st.pend.f.length;
+  el.hidden=false;const n=pendientes();
   let c='',t='Guardado';
-  if(!API){c='cola';t='Modo prueba'}
-  else if(cerrado()&&n){c='mal';t=n+' sin guardar: test cerrado'}
+  if(!API){c='mal';t=n?n+' sin enviar':'Sin servidor'}
+  else if(cerrado()&&n){c='mal';t=n+' sin guardar: cerrado'}
   else if(cerrado()){c='';t='Test cerrado'}
+  else if(errSrv&&n){c='mal';t=n+' sin enviar'}
   else if(sinRed&&n){c='cola';t=n+' sin enviar'}
   else if(sinRed){c='cola';t='Sin señal'}
   else if(n||inflight){c='env';t='Enviando…'}
   el.className='sync '+c;el.textContent=t;
 }
-window.addEventListener('online',()=>{sinRed=false;enviar()});
+window.addEventListener('online',()=>{sinRed=false;cargaConfig();enviar()});
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){leer();pidePantalla()}});
 setInterval(leer,15000);
 
@@ -499,7 +589,8 @@ function ir(v,sid,empuja){
   cfg.vista=v;if(sid!==undefined)cfg.sid=sid;guardaCfg();
   if(empuja!==false)history.pushState({v,sid:cfg.sid},'');
   VISTAS.forEach(x=>$('v-'+x).hidden=x!==v);
-  $('btn-volver').hidden=v==='inicio';
+  $('btn-volver').hidden=v==='inicio';$('k-abajo').hidden=v!=='crono';
+  if(v!=='crono')msgCrono=null;else{$('toast').hidden=true;deshacer=null}
   window.scrollTo(0,0);repinta();
 }
 function arriba(){
@@ -511,7 +602,7 @@ function arriba(){
 $('btn-volver').onclick=()=>history.length>1?history.back():arriba();
 window.addEventListener('popstate',()=>arriba());
 function repinta(){
-  $('t-barra').textContent=st&&cfg.vista!=='inicio'?st.id:'Tests de agua';
+  $('t-barra').textContent=st&&cfg.vista!=='inicio'?st.id:'Club Náutico';
   if(cfg.vista==='inicio')pintaInicio();
   else if(!st){ir('inicio','',false);return}
   else if(cfg.vista==='test')pintaTest();
@@ -520,23 +611,25 @@ function repinta(){
   if(!$('h-det').hidden)refrescaDetalle();
   pintaSync();
 }
-let tAviso=null,deshacer=null,msgCrono=null;
+// Avisos: en el cronómetro van a la barra inferior fija (siempre al alcance del pulgar); fuera, a un aviso flotante.
+let tAviso=null,deshacer=null,msgCrono=null,queEstado='';
 function aviso(t,fnDeshacer){
+  clearTimeout(tAviso);deshacer=fnDeshacer||null;
+  const dura=fnDeshacer?8000:5000;
   if(cfg.vista==='crono'&&$('h-det').hidden&&$('h-nad').hidden){
-    msgCrono=t;deshacer=fnDeshacer||null;$('toast').hidden=true;pintaMsgCrono();
-    clearTimeout(tAviso);tAviso=setTimeout(()=>{msgCrono=null;deshacer=null;pintaMsgCrono()},fnDeshacer?6000:4000);return;
+    msgCrono=t;$('toast').hidden=true;pintaMsgCrono();
+    tAviso=setTimeout(()=>{msgCrono=null;deshacer=null;pintaMsgCrono()},dura);return;
   }
-  $('toast-t').textContent=t;$('toast').hidden=false;deshacer=fnDeshacer||null;$('toast-b').hidden=!deshacer;
-  clearTimeout(tAviso);tAviso=setTimeout(()=>{$('toast').hidden=true;deshacer=null},fnDeshacer?6000:4000);
+  $('toast-t').textContent=t;$('toast').hidden=false;$('toast-b').hidden=!deshacer;
+  tAviso=setTimeout(()=>{$('toast').hidden=true;deshacer=null},dura);
 }
-$('toast-b').onclick=()=>{if(deshacer){deshacer();deshacer=null}$('toast').hidden=true};
-let queEstado='';
+$('toast-b').onclick=()=>{if(deshacer){const f=deshacer;deshacer=null;f()}$('toast').hidden=true};
 function pintaMsgCrono(){
-  const q=$('k-que');if(!q)return;
-  q.textContent=msgCrono||queEstado;q.parentNode.classList.toggle('msg',!!msgCrono);$('k-desh').hidden=!(msgCrono&&deshacer);
+  $('k-msg').textContent=msgCrono||queEstado;$('k-abajo').classList.toggle('msg',!!msgCrono);$('k-desh').hidden=!(msgCrono&&deshacer);
 }
-$('k-desh').onclick=()=>{if(deshacer){deshacer();deshacer=null}msgCrono=null;pintaMsgCrono()};
+$('k-desh').onclick=()=>{if(deshacer){const f=deshacer;deshacer=null;clearTimeout(tAviso);f()}msgCrono=null;pintaMsgCrono()};
 async function copia(t){try{await navigator.clipboard.writeText(t);aviso('ID copiado')}catch(e){aviso('Copia el ID: '+t)}}
+const errRed=e=>e&&e.message==='sin api'?'No se cargó la conexión con el servidor. Recarga la página con internet.':null;
 
 /* ---------- inicio ---------- */
 function hoyISO(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
@@ -549,8 +642,10 @@ function pintaInicio(){
   $('recientes').hidden=!rec.length;
   $('l-recientes').innerHTML=rec.map(r=>`<button class="reciente" type="button" data-id="${esc(r.id)}"><span><b>${esc(fechaLarga(r.fecha))} · ${esc(r.profesor)}</b><small>${esc(r.id)}</small></span><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button>`).join('');
 }
-$('l-recientes').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;$('e-id').value=b.dataset.id;if(!$('e-nombre').value.trim())$('e-nombre').focus();else $('f-entrar').requestSubmit()});
+$('l-recientes').addEventListener('click',e=>{const b=e.target.closest('[data-id]');if(!b)return;$('e-id').value=b.dataset.id;if(!$('e-nombre').value.trim())$('e-nombre').focus();else enviaForm($('f-entrar'))});
 const normId=s=>String(s||'').toUpperCase().replace(/\s+/g,'').trim();
+const ID_OK=/^\d{4}-\d{2}-\d{2}-[A-Z]+-(\d{3}|\d{6})$/;     // 3 cifras (tests antiguos) o 6 (nuevos)
+function guardaPersistente(){try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist().catch(()=>{})}catch(e){}}
 async function entrar(id,juez,errEl,btn){
   errEl.hidden=true;
   const local=abreLocal(id);
@@ -562,36 +657,40 @@ async function entrar(id,juez,errEl,btn){
       errEl.hidden=false;return false;
     }
     if(!local)st={id,test:r.test,series:{},filas:{},padron:[],pend:{s:[],f:[]}};
-    sinRed=false;aplicar(r);
+    sinRed=false;errSrv='';aplicar(r);
   }catch(e){
-    if(!local){errEl.textContent='No hay conexión. Para entrar por primera vez a un test necesitas internet.';errEl.hidden=false;return false}
+    if(!local){errEl.textContent=errRed(e)||'No hay conexión. Para entrar por primera vez a un test necesitas internet.';errEl.hidden=false;return false}
     sinRed=true;aviso('Sin señal: trabajas con lo guardado en este celular');
   }finally{btn.disabled=false;btn.textContent=txt}
   cfg.juez=juez;cfg.id=id;
   cfg.recientes=[{id,fecha:st.test.fecha,profesor:st.test.profesor}].concat((cfg.recientes||[]).filter(x=>x.id!==id)).slice(0,8);
-  guardaCfg();guardaSt();ir('test','');pidePantalla();
-  if(st.pend.s.length||st.pend.f.length)enviar();
+  guardaCfg();guardaSt();ir('test','');pidePantalla();guardaPersistente();
+  if(pendientes())enviar();
   return true;
 }
 $('f-entrar').addEventListener('submit',async e=>{
   e.preventDefault();
   const juez=$('e-nombre').value.trim(),id=normId($('e-id').value),err=$('e-error');
   if(!juez){err.textContent='Escribe tu nombre: queda junto a cada tiempo que registres.';err.hidden=false;$('e-nombre').focus();return}
-  if(!/^\d{4}-\d{2}-\d{2}-[A-Z]+-\d{3}$/.test(id)){err.textContent='El ID tiene esta forma: 2026-11-09-RICARDO-482.';err.hidden=false;$('e-id').focus();return}
+  if(!ID_OK.test(id)){err.textContent='El ID tiene esta forma: 2026-11-09-RICARDO-482915.';err.hidden=false;$('e-id').focus();return}
   await entrar(id,juez,err,$('e-btn'));
 });
-let creado=null;
+let creado=null,nonceCrear='';
+['c-fecha','c-prof'].forEach(x=>$(x).addEventListener('input',()=>{nonceCrear=''}));
 $('f-crear').addEventListener('submit',async e=>{
   e.preventDefault();
   const fecha=$('c-fecha').value,prof=$('c-prof').value.trim(),clave=$('c-clave').value,err=$('c-error');err.hidden=true;
   if(!fecha||!prof||!clave){err.textContent='Completa la fecha, el profesor y la contraseña.';err.hidden=false;return}
+  // El mismo pedido reintentado (se cortó la señal) no crea un test duplicado.
+  if(!nonceCrear)nonceCrear=(Date.now().toString(36)+Math.random().toString(36).slice(2,10)).slice(0,20);
   const btn=$('c-btn');btn.disabled=true;btn.textContent='Creando…';
   try{
-    const r=await llamar({accion:'crear',fecha,profesor:prof,clave});
-    if(!r.ok){err.textContent=r.error==='clave'?'La contraseña del club no es correcta.':'No se pudo crear el test. Inténtalo de nuevo.';err.hidden=false;return}
-    creado={r,prof};$('c-clave').value='';
+    const r=await llamar({accion:'crear',fecha,profesor:prof,clave,nonce:nonceCrear});
+    if(!r.ok){err.textContent=r.error==='clave'?'La contraseña del club no es correcta.':r.error==='bloqueado'?'Demasiados intentos con la contraseña. Espera 15 minutos.':'No se pudo crear el test. Inténtalo de nuevo.';err.hidden=false;return}
+    nonceCrear='';creado={r,prof};$('c-clave').value='';
+    if(r.llave){cfg.llaves=cfg.llaves||{};cfg.llaves[r.test.id]=r.llave;const ks=Object.keys(cfg.llaves);if(ks.length>20)delete cfg.llaves[ks[0]];guardaCfg()}
     $('c-id').textContent=r.test.id;$('f-crear').hidden=true;$('c-listo').hidden=false;
-  }catch(x){err.textContent='No hay conexión. Crear un test necesita internet.';err.hidden=false}
+  }catch(x){err.textContent=errRed(x)||'No hay conexión. Crear un test necesita internet.';err.hidden=false}
   finally{btn.disabled=false;btn.textContent='Crear test'}
 });
 $('c-copiar').onclick=()=>creado&&copia(creado.r.test.id);
@@ -602,7 +701,7 @@ $('c-empezar').onclick=()=>{
   st={id,test:r.test,series:{},filas:{},padron:r.padron||[],pend:{s:[],f:[]}};cro={};mis={};
   cfg.juez=cfg.juez||creado.prof;cfg.id=id;
   cfg.recientes=[{id,fecha:r.test.fecha,profesor:r.test.profesor}].concat((cfg.recientes||[]).filter(x=>x.id!==id)).slice(0,8);
-  guardaCfg();guardaSt();creado=null;$('f-crear').hidden=false;$('c-listo').hidden=true;ir('test','');pidePantalla();
+  guardaCfg();guardaSt();creado=null;$('f-crear').hidden=false;$('c-listo').hidden=true;$('p-crear').open=false;ir('test','');pidePantalla();guardaPersistente();
 };
 
 /* ---------- test ---------- */
@@ -615,7 +714,7 @@ function pintaTest(){
   ss.forEach(s=>ocupados(s).forEach(f=>{if(f.fin&&!f.ns)tiempos++;else if(!f.ns)falta++;if(f.pend)pend++}));
   $('t-resumen').innerHTML=`<span><b>${ss.length}</b> ${ss.length===1?'serie':'series'}</span><span><b>${tiempos}</b> ${tiempos===1?'tiempo':'tiempos'}</span>`+
     (falta?`<span><b>${falta}</b> sin tiempo final</span>`:'')+(pend?`<span><b>${pend}</b> por revisar en el Maestro</span>`:'');
-  $('t-cerrado').hidden=!cerrado();$('t-nueva').hidden=cerrado();$('t-cerrar').hidden=cerrado();
+  $('t-cerrado').hidden=!cerrado();$('t-nueva').hidden=cerrado();$('t-cerrar').hidden=cerrado();if(cerrado())$('t-cc').hidden=true;
   $('t-salir').textContent='Salir del test ('+cfg.juez+')';
   if(!ss.length){$('t-series').innerHTML=`<div class="vacio">Todavía no hay series. Toca <b>Nueva serie</b>, elige la prueba y los nadadores, y empieza a cronometrar.</div>`;return}
   $('t-series').innerHTML='<div class="series">'+ss.map(s=>{
@@ -629,21 +728,36 @@ $('t-nueva').onclick=()=>nuevaSerie(null);
 $('t-copiar').onclick=()=>copia(st.id);
 let armaCerrar=0;
 $('t-cerrar').onclick=async()=>{
-  const n=st.pend.s.length+st.pend.f.length;
+  const n=pendientes();
   if(n){aviso('Hay '+n+' cambios sin enviar. Espera a que diga Guardado.');enviar();return}
   if(Date.now()-armaCerrar>4000){armaCerrar=Date.now();$('t-cerrar').textContent='Toca otra vez para cerrar';setTimeout(()=>{$('t-cerrar').textContent='Cerrar test'},4000);return}
-  try{const r=await llamar({accion:'cerrar',id:st.id,juez:cfg.juez});if(r.ok){aplicar(r);aviso('Test cerrado. Ya se puede cargar a la base.')}else aviso('No se pudo cerrar. Inténtalo de nuevo.')}
-  catch(e){aviso('Sin conexión: el test no se cerró.')}
-  $('t-cerrar').textContent='Cerrar test';
+  armaCerrar=0;$('t-cerrar').textContent='Cerrar test';await cerrarTest('');
 };
+// Cerrar pide la llave que recibió el celular que creó el test, o la contraseña del club (servidor nuevo).
+async function cerrarTest(clave){
+  const err=$('cc-error');err.hidden=true;
+  try{
+    const r=await llamar({accion:'cerrar',id:st.id,juez:cfg.juez,llave:(cfg.llaves||{})[st.id]||'',clave});
+    if(r.ok){$('cc-clave').value='';$('t-cc').hidden=true;aplicar(r);aviso('Test cerrado. Ya se puede cargar a la base.')}
+    else if(r.error==='clave'){$('t-cc').hidden=false;if(clave){err.textContent='La contraseña no es correcta.';err.hidden=false}else $('cc-clave').focus()}
+    else if(r.error==='bloqueado'){$('t-cc').hidden=false;err.textContent='Demasiados intentos. Espera 15 minutos.';err.hidden=false}
+    else aviso('No se pudo cerrar. Inténtalo de nuevo.');
+  }catch(e){aviso(errRed(e)||'Sin conexión: el test no se cerró.')}
+}
+$('cc-btn').onclick=()=>{const c=$('cc-clave').value;if(c)cerrarTest(c)};
 $('r-btn').onclick=async()=>{
   const clave=$('r-clave').value,err=$('r-error');err.hidden=true;if(!clave)return;
   try{const r=await llamar({accion:'reabrir',id:st.id,clave,juez:cfg.juez});
-    if(r.ok){$('r-clave').value='';aplicar(r);aviso('Test reabierto');if(st.pend.s.length||st.pend.f.length)enviar()}
-    else{err.textContent=r.error==='clave'?'La contraseña no es correcta.':'No se pudo reabrir.';err.hidden=false}}
-  catch(e){err.textContent='Sin conexión.';err.hidden=false}
+    if(r.ok){$('r-clave').value='';aplicar(r);aviso('Test reabierto');if(pendientes())enviar()}
+    else{err.textContent=r.error==='clave'?'La contraseña no es correcta.':r.error==='bloqueado'?'Demasiados intentos. Espera 15 minutos.':'No se pudo reabrir.';err.hidden=false}}
+  catch(e){err.textContent=errRed(e)||'Sin conexión.';err.hidden=false}
 };
-$('t-salir').onclick=()=>{cfg.id='';guardaCfg();st=null;ir('inicio','')};
+let armaSalir=0;
+$('t-salir').onclick=()=>{
+  const n=pendientes();
+  if(n&&Date.now()-armaSalir>6000){armaSalir=Date.now();aviso('Hay '+n+' cambios sin enviar. Quedan en este celular y se envían al volver a entrar a este test. Toca otra vez para salir.');return}
+  armaSalir=0;cfg.id='';guardaCfg();st=null;ir('inicio','');
+};
 
 /* ---------- armar serie ---------- */
 let borrador=null;      // la serie que se está armando: {s, lanes:{c:{nid,nom,pend}}, nueva}
@@ -666,7 +780,7 @@ function editaSerie(sid,empuja){
   lanesDe(s).forEach(f=>{if(f.nid||f.nom)lanes[f.c]={nid:f.nid,nom:f.nom,pend:f.pend}});
   borrador={s,lanes,nueva:false};ir('serie',sid,empuja);
 }
-const tieneTiempos=sid=>Object.values(st.filas).some(f=>f.sid===sid&&(f.fin||f.pas.some(Boolean)));
+const tieneTiempos=sid=>Object.values(st.filas).some(f=>f.sid===sid&&(f.fin||(f.pas||[]).some(Boolean)));
 function pintaSerie(){
   if(!borrador||borrador.s.sid!==cfg.sid){if(st.series[cfg.sid])editaSerie(cfg.sid);else ir('test','',false);return}
   const s=borrador.s,bloq=!borrador.nueva&&tieneTiempos(s.sid);
@@ -697,7 +811,7 @@ $('s-carriles').addEventListener('click',e=>{const b=e.target.closest('[data-c]'
 $('s-limpiar').onclick=()=>{borrador.lanes={};pintaSerie()};
 $('s-lanes').addEventListener('click',e=>{const b=e.target.closest('[data-lane]');if(b)abreSelector(+b.dataset.lane)});
 $('s-listo').onclick=()=>{
-  const s=borrador.s,viejas=!borrador.nueva?lanesDe(st.series[s.sid]):[];
+  const s=borrador.s;
   const sAnt=st.series[s.sid];
   if(!sAnt||JSON.stringify([sAnt.prueba,sAnt.estilo,sAnt.pases,sAnt.carriles])!==JSON.stringify([s.prueba,s.estilo,s.pases,s.carriles])||borrador.nueva)tocaSerie(Object.assign({},s));
   for(let c=1;c<=10;c++){
@@ -717,8 +831,8 @@ let armaBorrar=0;
 $('s-borrar').onclick=()=>{
   if(Date.now()-armaBorrar>4000){armaBorrar=Date.now();$('s-borrar').textContent='Toca otra vez para eliminar la serie';setTimeout(()=>$('s-borrar').textContent='Eliminar esta serie',4000);return}
   const s=Object.assign({},st.series[borrador.s.sid],{borrada:true});tocaSerie(s);borrador=null;
-  aviso('Serie '+s.n+' eliminada',()=>{const v=Object.assign({},st.series[s.sid],{borrada:false});tocaSerie(v);repinta()});
   history.replaceState({v:'test',sid:''},'');ir('test','',false);
+  aviso('Serie '+s.n+' eliminada',()=>{const v=Object.assign({},st.series[s.sid],{borrada:false});tocaSerie(v);repinta()});
 };
 
 /* ---------- selector de nadador ---------- */
@@ -738,7 +852,7 @@ function pintaSelector(){
   let L=st.padron.filter(n=>q?normTxt(n.n).split(/\s+/).some(w=>w.startsWith(q))||normTxt(n.n).includes(q):(selGrupo==='Todos'||grupoDe(n)===selGrupo));
   L.sort((a,b)=>a.n.localeCompare(b.n,'es'));
   $('h-lista').innerHTML=L.length?L.map(n=>`<button class="nad" type="button" data-id="${esc(n.id)}"><span><b>${esc(n.n)}</b><small>${esc(n.cat||'Sin categoría')} · ${esc(grupoDe(n))}</small></span>${en[n.id]?`<span class="pill ya">Carril ${en[n.id]}</span>`:''}</button>`).join('')
-    :`<div class="nad" style="color:var(--muted)">${st.padron.length?'Nadie coincide con «'+esc($('h-q').value)+'».':'No llegó la lista de nadadores. Revisa la conexión y vuelve a entrar al test.'}</div>`;
+    :`<div class="nad" style="color:var(--muted)">${st.padron.length?'Nadie coincide con «'+esc($('h-q').value)+'».':'No llegó la lista de nadadores (llega con internet y solo para tests abiertos cerca de su fecha). Escribe el nombre para añadirlo como nadador por revisar.'}</div>`;
   const raw=$('h-q').value.trim(),hayExacto=L.some(n=>normTxt(n.n)===q);
   $('h-extra').innerHTML=(raw.length>=3&&!hayExacto?`<button class="btn ancho" type="button" id="h-nuevo">Añadir «${esc(raw)}» como nadador por revisar</button><p class="ayuda">Su tiempo se guarda, pero no pasa a la base hasta confirmarlo en el Maestro.</p>`:'')+
     (borrador.lanes[selCarril]?`<button class="btn texto peligro" type="button" id="h-quitar">Dejar el carril ${selCarril} vacío</button>`:'');
@@ -761,16 +875,63 @@ $('h-extra').addEventListener('click',e=>{
 });
 $('h-nad-cerrar').onclick=()=>history.back();
 
-/* ---------- cronómetro ---------- */
-// La marca que vale es la del instante en que el dedo toca la pantalla (pointerdown), no la del clic.
-let ultimoToque=null;
-document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('[data-tap]'))ultimoToque={t:e.timeStamp,visto:performance.now()}},true);
-const marcaToque=e=>{const t=ultimoToque&&performance.now()-ultimoToque.visto<1500?ultimoToque.t:e.timeStamp;ultimoToque=null;return t};
-function msEn(c,t){
-  // t es una marca de performance.now(). Si el teléfono se durmió, ese reloj pudo pausarse: entonces manda el del sistema.
-  const p=performance.timeOrigin+t-c.p,d=Date.now()-(performance.now()-t)-c.d;
-  return Math.abs(p-d)>500?d:p;
+/* ---------- cronómetro: toques ----------
+   La marca que vale es la del instante en que el dedo toca la pantalla (pointerdown / touchstart).
+   Cada toque guarda SU hora y SU carril (por dedo), y la acción se registra al levantar el dedo con esos datos guardados:
+   no depende de que el botón siga existiendo ni de un clic posterior, y dos dedos casi a la vez no cruzan horas.
+   Si el gesto se convierte en desplazamiento (pointercancel), no cuenta. */
+const toques=new Map();
+let silencioClic=0,repintaLuego=false;
+function inicioToque(id,e,x,y,target){
+  const el=target&&target.closest?target.closest('[data-tap]'):null;
+  if(!el||el.disabled||cfg.vista!=='crono'||!st)return;
+  toques.set(id,{h:horaDe(e),tipo:el.dataset.tap,c:+el.dataset.c||0,j:el.dataset.j!=null?+el.dataset.j:-1,sid:cfg.sid,x,y,el});
 }
+function movToque(id,x,y){const t=toques.get(id);if(t&&Math.abs(x-t.x)+Math.abs(y-t.y)>48){toques.delete(id);finRepinta()}}
+function finToque(id){const t=toques.get(id);if(!t)return;toques.delete(id);silencioClic=performance.now()+450;if(t.el)t.el._hecho=performance.now();ejecutaToque(t);finRepinta()}
+function cancelaToque(id){if(toques.delete(id))finRepinta()}
+function finRepinta(){if(repintaLuego&&!toques.size&&cfg.vista==='crono'){repintaLuego=false;pintaCrono()}}
+if(window.PointerEvent){
+  document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse'&&e.button!==0)return;inicioToque(e.pointerId,e,e.clientX,e.clientY,e.target)},true);
+  document.addEventListener('pointermove',e=>{if(toques.size)movToque(e.pointerId,e.clientX,e.clientY)},true);
+  document.addEventListener('pointerup',e=>finToque(e.pointerId),true);
+  document.addEventListener('pointercancel',e=>cancelaToque(e.pointerId),true);
+}else{   // iOS 12 o anterior: sin PointerEvent
+  let ultimoTouch=0;const cada=(l,fn)=>{for(let i=0;i<l.length;i++)fn(l[i])};
+  document.addEventListener('touchstart',e=>{ultimoTouch=Date.now();cada(e.changedTouches,t=>inicioToque('t'+t.identifier,e,t.clientX,t.clientY,t.target))},{capture:true,passive:true});
+  document.addEventListener('touchmove',e=>{if(toques.size)cada(e.changedTouches,t=>movToque('t'+t.identifier,t.clientX,t.clientY))},{capture:true,passive:true});
+  document.addEventListener('touchend',e=>{ultimoTouch=Date.now();cada(e.changedTouches,t=>finToque('t'+t.identifier))},{capture:true,passive:true});
+  document.addEventListener('touchcancel',e=>cada(e.changedTouches,t=>cancelaToque('t'+t.identifier)),{capture:true,passive:true});
+  document.addEventListener('mousedown',e=>{if(e.button===0&&Date.now()-ultimoTouch>1000)inicioToque('m',e,e.clientX,e.clientY,e.target)},true);
+  document.addEventListener('mouseup',e=>{if(Date.now()-ultimoTouch>1000)finToque('m')},true);
+}
+// El clic que sigue a un toque ya registrado no hace nada más (evita, por ejemplo, abrir el detalle del carril que acaba de llegar).
+document.addEventListener('click',e=>{if(performance.now()<silencioClic&&e.target.closest&&e.target.closest('#v-crono')){e.preventDefault();e.stopPropagation()}},true);
+function ejecutaToque(t){
+  const s=st&&st.series[t.sid];if(!s||s.borrada||cerrado())return;
+  if(t.tipo==='salida'){
+    if(cro[s.sid])return;
+    const sal={p:T0+t.h.p,d:t.h.d};
+    if(!isFinite(sal.p)&&!isFinite(sal.d)){aviso('No se pudo leer la hora de la salida. Vuelve a tocar Salida.');return}
+    cro[s.sid]=sal;
+    try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume()}catch(x){}
+    guardaSt();pintaCrono();return;
+  }
+  const sal=cro[s.sid];if(!sal||!esMio(s,t.c))return;
+  const f=fila(s.sid,t.c);if(f.fin||f.ns||!(f.nid||f.nom))return;
+  const pase=t.tipo==='pase';if(pase&&(t.j<0||f.pas[t.j]))return;
+  const v=msEn(sal,t.h);
+  if(v==null||v<=0){aviso('No se pudo calcular el tiempo del carril '+t.c+'. Escríbelo a mano tocando el nombre.');return}
+  const m=Math.floor(v);                         // milésimas truncadas; las centésimas también se truncan al mostrar y guardar
+  const prevs=f.pas.filter(Boolean),ant=prevs.length?Math.max(...prevs):0;
+  if(m-ant<(pase?3000:1000)){aviso('Carril '+t.c+': toque ignorado, muy seguido al anterior');return}
+  const antes=JSON.parse(JSON.stringify(f));
+  if(pase){const j=t.j;toca(s.sid,t.c,x=>{x.pas[j]=m;x.man=false},true);aviso('Carril '+t.c+': '+pasesDe(s)[j]+' m en '+fmtT(m),()=>{toca(s.sid,t.c,x=>{x.pas=antes.pas;x.man=antes.man},true);pintaCrono()})}
+  else{toca(s.sid,t.c,x=>{x.fin=m;x.man=false},true);aviso('Carril '+t.c+': llegó en '+fmtT(m),()=>{toca(s.sid,t.c,x=>{x.fin=antes.fin;x.man=antes.man},true);pintaCrono()})}
+  pintaCrono();
+}
+
+/* ---------- cronómetro: pantalla ---------- */
 const serieAct=()=>st&&st.series[cfg.sid];
 function estadoLane(s,f){
   if(f.ns)return 'ns';if(f.fin)return 'fin';if(cro[s.sid])return 'corre';return 'espera';
@@ -785,18 +946,36 @@ function pintaCrono(){
   $('k-reloj').classList.toggle('corre',!!salida&&corriendo>0);
   const b=$('k-salida');
   if(cerrado()){b.hidden=true}
-  else if(!salida){b.hidden=false;b.className='salida';b.textContent='Salida';b.dataset.tap='1';b.disabled=!mios.length}
-  else{b.hidden=false;b.className='salida sec'+(armaAnular?' arma':'');b.textContent=armaAnular?'Toca para anular':'Anular salida';delete b.dataset.tap;b.disabled=false}
+  else if(!salida){b.hidden=false;b.className='salida';if(b.textContent!=='Salida')b.textContent='Salida';b.dataset.tap='salida';b.disabled=!mios.length}
+  else{b.hidden=false;b.className='salida sec'+(armaAnular?' arma':'');const tx=armaAnular?'Toca para anular':'Anular salida';if(b.textContent!==tx)b.textContent=tx;delete b.dataset.tap;b.disabled=false}
   const hechos=mios.filter(f=>f.fin||f.ns).length;
-  queEstado=cerrado()?'El test está cerrado.':!mios.length?'Elige abajo los carriles que tomas en este celular.':!salida?'Toca Salida con la señal de partida. Arrancan tus '+mios.length+(mios.length===1?' carril':' carriles')+'.':corriendo?corriendo+(corriendo===1?' nadador en el agua':' nadadores en el agua')+' · '+hechos+' de '+mios.length+' llegaron':'Llegaron todos tus carriles.';
+  queEstado=cerrado()?'El test está cerrado.':!mios.length?'Elige arriba los carriles que tomas en este celular.':!salida?'Toca Salida con la señal de partida. Arrancan tus '+mios.length+(mios.length===1?' carril':' carriles')+'.':corriendo?corriendo+(corriendo===1?' nadador en el agua':' nadadores en el agua')+' · '+hechos+' de '+mios.length+' llegaron':'Llegaron todos tus carriles. Toca un tiempo para corregirlo.';
   pintaMsgCrono();
   if(!salida)$('k-t').textContent='00:00.000';
   else if(!corriendo){const mx=Math.max(0,...mios.map(f=>f.fin||0));$('k-t').textContent=fmtMs(mx)}
-  // carriles de este celular
-  $('k-mis').innerHTML=oc.length>1?`<span>Mis carriles</span><div class="chips">${oc.map(f=>`<button type="button" data-mio="${f.c}" aria-pressed="${esMio(s,f.c)}" aria-label="Carril ${f.c}">${f.c}</button>`).join('')}</div>`:'';
-  $('k-lanes').innerHTML=oc.length?oc.map(f=>laneHtml(s,f,ps,it)).join(''):`<div class="ln"><span></span><span class="info"><small>No hay nadadores en esta serie.</small></span></div>`;
+  const hm=oc.length>1?`<span>Mis carriles</span><div class="chips">${oc.map(f=>`<button type="button" data-mio="${f.c}" aria-pressed="${esMio(s,f.c)}" aria-label="Carril ${f.c}">${f.c}</button>`).join('')}</div>`:'';
+  if($('k-mis')._h!==hm){$('k-mis').innerHTML=hm;$('k-mis')._h=hm}
+  pintaLanes(s,oc,ps,it);
   $('k-sig').hidden=cerrado()||!oc.length;$('k-editar').hidden=cerrado();
   $('k-sig').classList.toggle('prim',!!salida&&!corriendo&&mios.length>0);
+}
+// Los carriles se actualizan uno por uno y solo si cambiaron; un carril con un dedo encima no se toca hasta que se levanta.
+const tocandoEn=el=>{let r=false;toques.forEach(t=>{if(t.el&&el.contains(t.el))r=true});return r};
+function pintaLanes(s,oc,ps,it){
+  const cont=$('k-lanes');
+  if(!oc.length){const h=`<div class="ln" data-k="vacio"><span></span><span class="info"><small>No hay nadadores en esta serie.</small></span></div>`;if(cont._h!==h){cont.innerHTML=h;cont._h=h}return}
+  cont._h=null;
+  const hs=oc.map(f=>laneHtml(s,f,ps,it)),ks=oc.map(f=>'c'+f.c),hijos=Array.prototype.slice.call(cont.children);
+  const igual=hijos.length===ks.length&&hijos.every((x,i)=>x.dataset.k===ks[i]);
+  if(!igual){
+    if(toques.size){repintaLuego=true;return}
+    cont.innerHTML=hs.join('');Array.prototype.forEach.call(cont.children,(x,i)=>{x._h=hs[i]});return;
+  }
+  hijos.forEach((el,i)=>{
+    if(el._h===hs[i])return;
+    if(tocandoEn(el)){repintaLuego=true;return}
+    const tmp=document.createElement('div');tmp.innerHTML=hs[i];const nuevo=tmp.firstElementChild;nuevo._h=hs[i];cont.replaceChild(nuevo,el);
+  });
 }
 function laneHtml(s,f,ps,it){
   const e=estadoLane(s,f),mio=esMio(s,f.c),inte=it[f.k]>1?' · intento '+it[f.k]:'';
@@ -807,20 +986,20 @@ function laneHtml(s,f,ps,it){
   if(f.ns)sub='No se presentó';
   else if(f.fin)sub=subFin(s,f);
   else if(e==='corre')sub=ultimo?`<em>${ultimo[0]} m · ${fmtT(ultimo[1])}</em>`+(f.pas[ps.indexOf(ultimo[0])-1]?' · parcial '+fmtCs(csDe(ultimo[1])-csDe(f.pas[ps.indexOf(ultimo[0])-1])):''):'En el agua';
-  else sub=(f.pend?'Por revisar · ':'')+(f.juez&&f.juez!==cfg.juez&&(f.fin||nPas)?'Lo toma '+f.juez:'Listo para la salida')+(conPulso(s)&&f.pul&&f.pul.i?' · pulso inicial '+f.pul.i:'');
-  const nombre=esc(corto(f))+'<span style="color:var(--muted);font-weight:500">'+esc(inte)+'</span>';
+  else sub=(f.pend?'Por revisar · ':'')+(f.juez&&f.juez!==cfg.juez&&(f.fin||nPas)?'Lo toma '+esc(f.juez):'Listo para la salida')+(conPulso(s)&&f.pul&&f.pul.i?' · pulso inicial '+f.pul.i:'');
+  const nombre=esc(corto(f))+'<span style="color:var(--muted);font-weight:400">'+esc(inte)+'</span>';
   if(!mio){
-    return `<div class="ln ajeno"><span class="n">${f.c}</span><button class="info" type="button" data-det="${f.c}"><b>${nombre}</b><small>${f.fin?'Final '+fmtT(f.fin):f.ns?'No se presentó':'Lo toma otro celular'}${f.juez&&f.juez!==cfg.juez?' · '+esc(f.juez):''}</small></button><span></span></div>`;
+    return `<div class="ln ajeno" data-k="c${f.c}"><span class="n">${f.c}</span><button class="info" type="button" data-det="${f.c}"><b>${nombre}</b><small>${f.fin?'Final '+fmtT(f.fin):f.ns?'No se presentó':'Lo toma otro celular'}${f.juez&&f.juez!==cfg.juez?' · '+esc(f.juez):''}</small></button><span></span></div>`;
   }
   let bts='';
   if(cerrado()){bts=''}
   else if(e==='corre'){
     const sig=ps.find((m,j)=>!f.pas[j]),ja=ps.indexOf(sig);
-    bts=`<div class="bts">${sig?`<button class="b-pase" type="button" data-tap="1" data-pase="${f.c}" data-j="${ja}" aria-label="Pase ${sig} metros carril ${f.c}">${sig} m</button>`:(ps.length?'<span class="b-hueco" aria-hidden="true"></span>':'')}<button class="b-parar ${ps.length?'':'solo'}" type="button" data-tap="1" data-parar="${f.c}" aria-label="Parar carril ${f.c}">Parar</button></div>`;
+    bts=`<div class="bts">${sig?`<button class="b-pase" type="button" data-tap="pase" data-c="${f.c}" data-j="${ja}" aria-label="Pase ${sig} metros carril ${f.c}">${sig} m</button>`:(ps.length?'<span class="b-hueco" aria-hidden="true"></span>':'')}<button class="b-parar ${ps.length?'':'solo'}" type="button" data-tap="parar" data-c="${f.c}" aria-label="Parar carril ${f.c}">Parar</button></div>`;
   }else if(e==='fin'){
     bts=`<button class="final" type="button" data-det="${f.c}"><b>${fmtT(f.fin)}</b><small>${f.man?'Escrito a mano':'Corregir'}</small></button>`;
   }else if(e==='ns'){bts=`<button class="btn texto" type="button" data-det="${f.c}">Corregir</button>`}
-  return `<div class="ln ${e==='corre'?'corre':''}" id="ln-${f.c}"><span class="n">${f.c}</span><button class="info" type="button" data-det="${f.c}"><b>${nombre}</b><small id="sub-${f.c}">${sub}</small>${pista}</button>${bts}</div>`;
+  return `<div class="ln ${e==='corre'?'corre':''}" data-k="c${f.c}"><span class="n">${f.c}</span><button class="info" type="button" data-det="${f.c}"><b>${nombre}</b><small id="sub-${f.c}">${sub}</small>${pista}</button>${bts}</div>`;
 }
 // Lo que dice la fila de un nadador que ya llegó: primero el pulso que toca, si lo hay; si no, su último pase.
 function subFin(s,f){
@@ -848,7 +1027,7 @@ const pitados={};
     const s=serieAct();
     if(s&&cro[s.sid]){
       const mios=ocupados(s).filter(f=>esMio(s,f.c));
-      if(mios.some(f=>estadoLane(s,f)==='corre'))$('k-t').textContent=fmtMs(msEn(cro[s.sid],performance.now()));
+      if(mios.some(f=>estadoLane(s,f)==='corre')){const v=msEn(cro[s.sid],{p:performance.now(),d:Date.now()});if(v!=null)$('k-t').textContent=fmtMs(v)}
     }
   }
   requestAnimationFrame(cuadro);
@@ -856,21 +1035,18 @@ const pitados={};
 setInterval(()=>{
   if(cfg.vista!=='crono'||!st)return;const s=serieAct();if(!s||!conPulso(s)||!cro[s.sid])return;
   ocupados(s).filter(f=>esMio(s,f.c)&&f.fin&&!f.man).forEach(f=>{
-    const el=$('sub-'+f.c);if(el)el.innerHTML=subFin(s,f);
+    const el=$('sub-'+f.c);if(el){const h=subFin(s,f);if(el.innerHTML!==h)el.innerHTML=h}
     const trans=(Date.now()-(cro[s.sid].d+f.fin))/1000;
     [['m1',60],['m2',120]].forEach(([q,seg])=>{const k=f.k+q;if(trans>=seg&&trans<seg+20&&!(f.pul||{})[q]&&!pitados[k]){pitados[k]=1;pita();aviso('Carril '+f.c+': toma el pulso de '+(seg/60)+' min')}});
   });
 },500);
 
 let armaAnular=0;
+// Salida: arranca con el toque (pointerdown). Este clic solo sirve para Anular, o para arrancar con el teclado.
 $('k-salida').addEventListener('click',e=>{
-  const s=serieAct();if(!s||cerrado())return;
-  if(!cro[s.sid]){
-    const t=marcaToque(e);
-    cro[s.sid]={p:performance.timeOrigin+t,d:Date.now()-(performance.now()-t)};
-    try{audio=audio||new (window.AudioContext||window.webkitAudioContext)();audio.resume()}catch(x){}
-    guardaSt();pintaCrono();return;
-  }
+  const s=serieAct(),b=$('k-salida');if(!s||cerrado())return;
+  if(b._hecho&&performance.now()-b._hecho<800)return;
+  if(!cro[s.sid]){if(e.detail===0)ejecutaToque({h:horaDe(e),tipo:'salida',c:0,j:-1,sid:s.sid});return}
   if(!armaAnular){armaAnular=1;pintaCrono();setTimeout(()=>{armaAnular=0;if(cfg.vista==='crono')pintaCrono()},3000);return}
   armaAnular=0;
   const salida=cro[s.sid];delete cro[s.sid];
@@ -881,15 +1057,10 @@ $('k-salida').addEventListener('click',e=>{
 });
 $('k-lanes').addEventListener('click',e=>{
   const s=serieAct();if(!s)return;
-  const bp=e.target.closest('[data-pase]'),bf=e.target.closest('[data-parar]'),bd=e.target.closest('[data-det]');
-  if(bp||bf){
-    const t=marcaToque(e),c=+(bp||bf).dataset[bp?'pase':'parar'],sal=cro[s.sid];if(!sal)return;
-    const f=fila(s.sid,c),m=Math.round(msEn(sal,t)),prevs=f.pas.filter(Boolean),ant=prevs.length?Math.max(...prevs):0;
-    if(m-ant<(bp?3000:1000)){aviso('Toque ignorado: muy seguido al anterior');return}
-    const antes=JSON.parse(JSON.stringify(f));
-    if(bp){const j=+bp.dataset.j;toca(s.sid,c,x=>{x.pas[j]=m;x.man=false},true);aviso('Carril '+c+': '+pasesDe(s)[j]+' m en '+fmtT(m),()=>{toca(s.sid,c,x=>{x.pas=antes.pas},true);pintaCrono()})}
-    else{toca(s.sid,c,x=>{x.fin=m;x.man=false},true);aviso('Carril '+c+': llegó en '+fmtT(m),()=>{toca(s.sid,c,x=>{x.fin=antes.fin},true);pintaCrono()})}
-    pintaCrono();return;
+  const bt=e.target.closest('[data-tap]'),bd=e.target.closest('[data-det]');
+  if(bt){   // con el dedo ya se registró en el toque; aquí solo llega el teclado (Enter o Espacio)
+    if(e.detail===0&&!(bt._hecho&&performance.now()-bt._hecho<800))ejecutaToque({h:horaDe(e),tipo:bt.dataset.tap,c:+bt.dataset.c,j:bt.dataset.j!=null?+bt.dataset.j:-1,sid:s.sid});
+    return;
   }
   if(bd)abreDetalle(+bd.dataset.det);
 });
@@ -917,7 +1088,7 @@ function pintaDetalle(){
     ps.map((m,j)=>campoT('d-p'+j,'Al pasar '+m+' m',f.pas[j])).join('')+campoT('d-fin','Tiempo final',f.fin,'final-campo')+`</div>
     ${f.fin&&!f.man?`<p class="ayuda">Cronómetro: ${fmtMs(f.fin)} (milésimas). Se guarda ${fmtT(f.fin)}.</p>`:''}</section>`;
   if(conPulso(s)){
-    const pu=f.pul||{},pc=(q,lab)=>`<label class="campo" for="d-${q}">${lab}<input id="d-${q}" inputmode="numeric" maxlength="3" value="${pu[q]||''}" ${dis}></label>`;
+    const pu=f.pul||{},pc=(q,lab)=>`<label class="campo" for="d-${q}">${lab}<input id="d-${q}" inputmode="numeric" maxlength="3" value="${pu[q]||''}" ${dis}><span class="par"></span></label>`;
     h+=`<section class="panel"><h2>Pulso</h2><p>Pulsaciones por minuto.</p><div class="tiempos">${pc('i','Inicial')}${pc('f','Al llegar')}${pc('m1','A 1 minuto')}${pc('m2','A 2 minutos')}</div></section>`;
   }
   h+=`<section class="panel"><label class="campo" for="d-obs">Observación<textarea id="d-obs" maxlength="200" placeholder="Salida nula, técnica, molestia…" ${dis}>${esc(f.obs||'')}</textarea></label>
@@ -967,13 +1138,30 @@ $('h-det-c').addEventListener('click',e=>{
 /* ---------- arranque ---------- */
 let wake=null;
 async function pidePantalla(){try{if(navigator.wakeLock&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null)}}catch(e){}}
+// Limpieza en este celular: los tests cerrados o de hace más de 30 días sin nada pendiente dejan de guardar la lista de nadadores;
+// los de hace más de 90 días sin pendientes se olvidan (siguen en la hoja del club).
+(function limpiaViejos(){
+  try{
+    const hoy=Date.now();
+    for(let i=localStorage.length-1;i>=0;i--){
+      const k=localStorage.key(i);if(!k||k.indexOf('ta_t_')!==0)continue;
+      const id=k.slice(5);if(id===cfg.id)continue;
+      const t=load(k,null);if(!t||!t.test)continue;
+      if(t.pend&&((t.pend.s||[]).length||(t.pend.f||[]).length))continue;
+      const dias=(hoy-Date.parse((t.test.fecha||'')+'T12:00:00'))/86400000;
+      if(dias>90){localStorage.removeItem(k);localStorage.removeItem('ta_c_'+id);localStorage.removeItem('ta_m_'+id);continue}
+      if((t.test.estado==='Cerrado'||dias>30)&&t.padron&&t.padron.length){t.padron=[];localStorage.setItem(k,JSON.stringify(t))}
+    }
+  }catch(e){}
+})();
 (function arranque(){
+  pintaSrv();if(!API)cargaConfig();
   if(cfg.id&&abreLocal(cfg.id)&&cfg.juez){
     const v=VISTAS.includes(cfg.vista)?cfg.vista:'test';
-    history.replaceState({v},'');ir(v==='inicio'?'test':v,cfg.sid,false);leer();if(st.pend.s.length||st.pend.f.length)enviar();pidePantalla();
+    history.replaceState({v},'');ir(v==='inicio'?'test':v,cfg.sid,false);leer();if(pendientes())enviar();pidePantalla();
   }else{cfg.vista='inicio';history.replaceState({v:'inicio'},'');ir('inicio','',false)}
 })();
-if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&window.isSecureContext)navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
