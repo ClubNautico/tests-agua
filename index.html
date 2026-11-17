@@ -1140,8 +1140,8 @@ $('h-det-c').addEventListener('click',e=>{
 /* ---------- arranque ---------- */
 let wake=null;
 async function pidePantalla(){try{if(navigator.wakeLock&&!wake){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>wake=null)}}catch(e){}}
-// Limpieza en este celular: los tests cerrados o de hace más de 30 días sin nada pendiente dejan de guardar la lista de nadadores;
-// los de hace más de 90 días sin pendientes se olvidan (siguen en la hoja del club).
+// Limpieza en este celular: los tests cerrados o de hace más de 7 días sin nada pendiente dejan de guardar la lista de nadadores;
+// los de hace más de 30 días sin pendientes se olvidan (siguen en la hoja del club).
 (function limpiaViejos(){
   try{
     const hoy=Date.now();
@@ -1151,8 +1151,8 @@ async function pidePantalla(){try{if(navigator.wakeLock&&!wake){wake=await navig
       const t=load(k,null);if(!t||!t.test)continue;
       if(t.pend&&((t.pend.s||[]).length||(t.pend.f||[]).length))continue;
       const dias=(hoy-Date.parse((t.test.fecha||'')+'T12:00:00'))/86400000;
-      if(dias>90){localStorage.removeItem(k);localStorage.removeItem('ta_c_'+id);localStorage.removeItem('ta_m_'+id);continue}
-      if((t.test.estado==='Cerrado'||dias>30)&&t.padron&&t.padron.length){t.padron=[];localStorage.setItem(k,JSON.stringify(t))}
+      if(dias>30){localStorage.removeItem(k);localStorage.removeItem('ta_c_'+id);localStorage.removeItem('ta_m_'+id);continue}
+      if((t.test.estado==='Cerrado'||dias>7)&&t.padron&&t.padron.length){t.padron=[];localStorage.setItem(k,JSON.stringify(t))}
     }
   }catch(e){}
 })();
