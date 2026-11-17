@@ -53,7 +53,7 @@ p{margin:0}
 /* barra superior */
 .barra{position:sticky;top:0;z-index:6;background:var(--surface);border-bottom:1px solid var(--border);padding-top:env(safe-area-inset-top,0px)}
 .barra-in{max-width:720px;margin:0 auto;height:52px;display:flex;align-items:center;gap:10px;padding:0 max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px))}
-.marca{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;min-width:0}
+.marca{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;min-width:0;min-height:44px;color:inherit;text-decoration:none}
 .marca svg{flex:none}
 .marca span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .volver{flex:none;width:44px;height:44px;margin-left:-10px;border:0;background:transparent;border-radius:var(--radius-control);display:grid;place-items:center}
@@ -250,7 +250,7 @@ details.prof .dentro{display:grid;gap:12px;padding:4px 0 var(--pad)}
 <body>
 <header class="barra" id="barra"><div class="barra-in">
   <button class="volver" id="btn-volver" type="button" aria-label="Volver" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
-  <div class="marca"><svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0E7C86"/><path d="M17 13h30v8H36v21h-8V21H17z" fill="#FFFFFF"/><path d="M13 51c4.5-4.5 8.5-4.5 13 0s8.5 4.5 13 0 8.5-4.5 13 0" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round"/></svg><span id="t-barra">Club Náutico</span></div>
+  <a class="marca" id="btn-inicio" href="#" aria-label="Ir al inicio de Tests de agua"><svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0E7C86"/><path d="M17 13h30v8H36v21h-8V21H17z" fill="#FFFFFF"/><path d="M13 51c4.5-4.5 8.5-4.5 13 0s8.5 4.5 13 0 8.5-4.5 13 0" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round"/></svg><span id="t-barra">Club Náutico</span></a>
   <span class="sync" id="sync" role="status" hidden>Guardado</span>
 </div>
 <div class="srv" id="srv" role="alert" hidden><p>No se cargó la conexión con el servidor. Tus tiempos quedan guardados en este celular y se envían solos cuando vuelva; la página lo reintenta sola.</p></div>
@@ -601,6 +601,8 @@ function arriba(){
 }
 $('btn-volver').onclick=()=>history.length>1?history.back():arriba();
 window.addEventListener('popstate',()=>arriba());
+// Logo de la barra: cierra hojas abiertas y vuelve a Inicio sin borrar el test ni la clave guardados (solo cambia de pantalla).
+$('btn-inicio').onclick=e=>{e.preventDefault();$('h-det').hidden=true;$('h-nad').hidden=true;$('toast').hidden=true;ir('inicio','',false)};
 function repinta(){
   $('t-barra').textContent=st&&cfg.vista!=='inicio'?st.id:'Club Náutico';
   if(cfg.vista==='inicio')pintaInicio();
