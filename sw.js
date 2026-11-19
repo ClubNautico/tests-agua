@@ -1,6 +1,6 @@
 // Permite abrir y recargar la página sin señal: primero la red y, si no hay, la última copia guardada.
 // Al instalarse guarda de entrada la página, la configuración, el manifiesto y los iconos.
-const CACHE = 'tests-agua-v2';
+const CACHE = 'tests-agua-v3';
 const BASE = ['./', 'index.html', 'config.js', 'manifest.webmanifest', 'icon-192.png', 'icon-512.png',
   'icon-512-maskable.png', 'apple-touch-icon.png', 'favicon-32.png'];
 self.addEventListener('install', e => e.waitUntil(

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<meta name="theme-color" content="#22409A">
+<meta name="theme-color" content="#060A12">
 <title>Tests de agua · Club Náutico</title>
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -16,26 +16,72 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <!-- Fuentes de la marca sin bloquear: si no hay señal, la página usa las del sistema y el cronómetro funciona igual. -->
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Slab:wght@700&family=Open+Sans:wght@400;600;700&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Instrument+Sans:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
+<script>
+/* Tema (DISEÑO CLUB.md): oscuro por defecto; se respeta la elección guardada ("club.tema"). */
+(function(){var t='dark';try{var g=localStorage.getItem('club.tema');if(g==='light'||g==='dark')t=g;}catch(e){}
+document.documentElement.setAttribute('data-theme',t);
+function mc(){var m=document.querySelector('meta[name=theme-color]');if(m)m.setAttribute('content',document.documentElement.getAttribute('data-theme')==='light'?'#F3F6FC':'#060A12');}
+mc();
+document.addEventListener('DOMContentLoaded',function(){
+  var h=document.querySelector('.barra-in');if(!h)return;
+  var b=document.createElement('button');b.type='button';b.className='tema-btn';
+  function pinta(){var l=document.documentElement.getAttribute('data-theme')==='light';b.textContent=l?'Oscuro':'Claro';b.setAttribute('aria-label',l?'Cambiar a tema oscuro':'Cambiar a tema claro');}
+  b.addEventListener('click',function(){var l=document.documentElement.getAttribute('data-theme')==='light';var n=l?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('club.tema',n);}catch(e){}mc();pinta();});
+  pinta();h.appendChild(b);
+});
+})();
+</script>
 <style>
 /* Tests de agua del Club Náutico. Pantalla de trabajo junto a la piscina, al sol:
    fondo claro, tinta casi negra, el azul rey del club en las acciones y en los tiempos; Parar en rojo.
    Marca común: Josefin Slab en títulos, Open Sans en el resto. Bordes de controles a 3:1 o más.
    Cuadrícula: una columna de 720px como máximo, márgenes de 16px en el teléfono, separación de 12px. */
+/* Tokens de DISEÑO CLUB.md ("Carril nocturno"): oscuro por defecto, claro con data-theme="light".
+   Los nombres antiguos (--ground, --surface, --muted...) siguen funcionando como alias. */
 :root{
-  --ground:#F4F6FB;--surface:#FFFFFF;--raised:#EDF0F7;--active:#E4E9F4;
-  --border:#DDE2EC;--rule:#ECEFF5;--control:#7C879C;
-  --text:#0E1626;--muted:#4D586C;--faint:#5E687B;
-  --accent:#22409A;--accent-ink:#1C3480;--accent-soft:#EDF1FC;--accent-track:#D3DCF5;
+  --fondo:#060A12;--superficie:#0B1220;--superficie-2:#111B30;--superficie-3:#18253F;
+  --borde:#1F2E4D;--borde-fuerte:#5A6F99;--linea:#16223A;
+  --texto:#F2F5FB;--texto-suave:#C3CDE2;--texto-tenue:#9AA9C6;
+  --acento:#2F6BFF;--acento-fuerte:#4A7FFF;--acento-texto:#7BA6FF;--acento-suave:#102448;--acento-pista:#1B2F5C;--anillo:#7BA6FF;
+  --ok:#4BE3A3;--ok-fondo:#0F2E22;--ok-tinta:#A8F0CF;
+  --aviso:#FFC272;--aviso-fondo:#33270A;--aviso-tinta:#FFD58A;--aviso-linea:#7A5A1E;
+  --error:#FF8A8A;--error-fondo:#3A1618;--error-tinta:#FFB4B4;
   --amber:#FFC93C;
-  --positive:#1F6E45;--pill-positive-bg:#DCF5E5;--pill-positive-ink:#0B3A20;
-  --negative:#B42318;--negative-ink:#8F1C13;--pill-negative-bg:#FDEBE8;--pill-negative-ink:#7A1A12;
-  --pill-warning-bg:#FFF6D9;--pill-warning-ink:#7A4A00;--warning-line:#F2D27A;
-  --radius-card:8px;--radius-control:6px;
-  --gap:12px;--pad:16px;--borde:2px;
-  --font:"Open Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
-  --display:"Josefin Slab","Roboto Slab",Rockwell,Georgia,serif;
-  --barra-h:53px;
+  --sobre-acento:#FFFFFF;
+  --sombra-flotante:0 12px 32px -8px rgba(0,0,0,.6),0 2px 6px rgba(0,0,0,.4);
+  --res-verde-bg:#0F2E22;--res-verde:#3DDC97;--res-verde-ink:#A8F0CF;
+  --res-amar-bg:#33270A;--res-amar:#FFB454;--res-amar-ink:#FFD58A;
+  --res-gris-bg:#1A2438;--res-gris:#8696B5;--res-gris-ink:#C3CDE2;
+  --res-rojo-bg:#3A1618;--res-rojo:#FF7A7A;--res-rojo-ink:#FFB4B4;
+  --res-fin-bg:#111B30;--res-fin-ink:#9AA9C6;
+  --radius-card:14px;--radius-control:10px;--gap:12px;--pad:16px;--borde-w:2px;
+  --font:"Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --display:"Geist","Instrument Sans",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  color-scheme:dark;
+  /* alias antiguos */
+  --ground:var(--fondo);--surface:var(--superficie);--raised:var(--superficie-2);--active:var(--superficie-3);
+  --border:var(--borde);--rule:var(--linea);--control:var(--borde-fuerte);
+  --text:var(--texto);--muted:var(--texto-suave);--faint:var(--texto-tenue);
+  --accent:var(--acento);--accent-ink:var(--acento-texto);--accent-soft:var(--acento-suave);--accent-track:var(--acento-pista);
+  --positive:var(--ok);--pill-positive-bg:var(--ok-fondo);--pill-positive-ink:var(--ok-tinta);
+  --negative:var(--error);--negative-ink:var(--error-tinta);--pill-negative-bg:var(--error-fondo);--pill-negative-ink:var(--error-tinta);
+  --pill-warning-bg:var(--aviso-fondo);--pill-warning-ink:var(--aviso-tinta);--warning-line:var(--aviso-linea);
+}
+[data-theme="light"]{
+  --fondo:#F3F6FC;--superficie:#FFFFFF;--superficie-2:#EAF0FA;--superficie-3:#DCE5F4;
+  --borde:#D5DFEF;--borde-fuerte:#8C9BB8;--linea:#E3E9F4;
+  --texto:#0A1224;--texto-suave:#33415C;--texto-tenue:#4A5876;
+  --acento:#1D55E8;--acento-fuerte:#2A62F0;--acento-texto:#1A4FD6;--acento-suave:#E3ECFF;--acento-pista:#C9D8FA;--anillo:#1D55E8;
+  --ok:#0A6B42;--ok-fondo:#DCF5E5;--ok-tinta:#0B3A20;
+  --aviso:#7A4700;--aviso-fondo:#FFF6D9;--aviso-tinta:#7A4A00;--aviso-linea:#F2D27A;
+  --error:#B01E1E;--error-fondo:#FDEBE8;--error-tinta:#7A1A12;
+  --sombra-flotante:0 12px 28px -8px rgba(10,24,60,.22),0 2px 6px rgba(10,24,60,.10);
+  --res-verde-bg:#DDF4E4;--res-verde:#1B7F46;--res-verde-ink:#0B3A20;
+  --res-amar-bg:#FFEFB0;--res-amar:#C28A00;--res-amar-ink:#5A3800;
+  --res-gris-bg:#E6E9EF;--res-gris:#8691A5;--res-gris-ink:#38425A;
+  --res-rojo-bg:#FDE1DD;--res-rojo:#C62A1D;--res-rojo-ink:#7A1A12;
+  --res-fin-bg:#F3F4F8;--res-fin-ink:#4D586C;
   color-scheme:light;
 }
 *{box-sizing:border-box}
@@ -72,7 +118,7 @@ p{margin:0}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-card);padding:var(--pad);display:grid;gap:12px}
 .panel h2+p{color:var(--muted);font-size:14px;margin-top:-6px}
 label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
-.campo input,.campo textarea{width:100%;min-height:48px;border:var(--borde) solid var(--control);border-radius:var(--radius-control);background:var(--surface);padding:8px 12px;font-size:17px;font-weight:600}
+.campo input,.campo textarea{width:100%;min-height:48px;border:var(--borde-w) solid var(--control);border-radius:var(--radius-control);background:var(--surface);padding:8px 12px;font-size:17px;font-weight:600}
 .campo textarea{min-height:76px;resize:vertical;font-size:16px;font-weight:400}
 .campo input::placeholder,.campo textarea::placeholder{color:var(--faint);font-weight:400}
 .campo input:focus,.campo textarea:focus{outline:3px solid var(--accent-track);border-color:var(--accent)}
@@ -83,7 +129,7 @@ label.campo{display:grid;gap:6px;font-size:14px;font-weight:600}
 .fila>*{min-width:0}
 
 /* botones: un relleno azul por pantalla para la tarea principal */
-.btn{min-height:48px;border-radius:var(--radius-control);border:var(--borde) solid var(--control);background:var(--surface);padding:8px 16px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn{min-height:48px;border-radius:var(--radius-control);border:var(--borde-w) solid var(--control);background:var(--surface);padding:8px 16px;font-weight:600;font-size:16px;display:inline-flex;align-items:center;justify-content:center;gap:8px}
 .btn:active{background:var(--raised)}
 .btn.prim{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
 .btn.prim:active{background:var(--accent-ink)}
@@ -126,14 +172,14 @@ details.prof .dentro{display:grid;gap:12px;padding:4px 0 var(--pad)}
 .serie-f .quienes{grid-column:1;color:var(--muted);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .serie-f .cuantos{grid-row:1/3;grid-column:2;text-align:right;font-size:14px;color:var(--muted)}
 .serie-f .cuantos b{display:block;font-size:17px;color:var(--text)}
-.vacio{border:var(--borde) dashed var(--control);border-radius:var(--radius-card);padding:16px;color:var(--muted);font-size:15px}
+.vacio{border:var(--borde-w) dashed var(--control);border-radius:var(--radius-card);padding:16px;color:var(--muted);font-size:15px}
 .aviso-caja{background:var(--pill-warning-bg);border:1px solid var(--warning-line);color:var(--pill-warning-ink);border-radius:var(--radius-card);padding:12px 14px;font-size:14px;font-weight:600;display:grid;gap:10px}
 
 /* armar serie */
 .grupo-op{display:grid;gap:8px}
 .grupo-op>span{font-size:14px;font-weight:600}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
-.chips button{min-height:48px;min-width:52px;padding:6px 14px;border-radius:var(--radius-control);border:var(--borde) solid var(--control);background:var(--surface);font-weight:600;font-size:15px}
+.chips button{min-height:48px;min-width:52px;padding:6px 14px;border-radius:var(--radius-control);border:var(--borde-w) solid var(--control);background:var(--surface);font-weight:600;font-size:15px}
 .chips button[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:#FFFFFF}
 .chips button:disabled{opacity:.45}
 .carril-f{display:flex;align-items:center;gap:12px;width:100%;min-height:56px;border:0;border-top:1px solid var(--rule);background:transparent;text-align:left;padding:6px 0}
@@ -166,7 +212,7 @@ details.prof .dentro{display:grid;gap:12px;padding:4px 0 var(--pad)}
 .reloj.corre .t{color:var(--accent-ink)}
 .salida{min-width:112px;min-height:60px;font-size:19px;font-weight:700;border-radius:var(--radius-control);border:0;background:var(--accent);color:#FFFFFF;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .salida:active{background:var(--accent-ink)}
-.salida.sec{background:var(--surface);color:var(--negative);border:var(--borde) solid var(--control);font-size:15px;font-weight:600;min-height:48px}
+.salida.sec{background:var(--surface);color:var(--negative);border:var(--borde-w) solid var(--control);font-size:15px;font-weight:600;min-height:48px}
 .salida.sec.arma{background:var(--pill-negative-bg);border-color:var(--negative)}
 .mis{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
 .mis>span{white-space:nowrap;font-weight:600}
@@ -245,9 +291,34 @@ details.prof .dentro{display:grid;gap:12px;padding:4px 0 var(--pad)}
   .reloj .t{font-size:46px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+
+/* ---------- DISEÑO CLUB.md: fuentes, escudo, tema ---------- */
+:focus-visible{outline-color:var(--anillo)}
+h1,h2{font-family:var(--display)}
+.reloj .t,.ln .final b,.id-grande,.ln .n,.carril-f .n,.salida,.tiempos .campo input,.marca span{font-family:var(--display)}
+.barra .marca svg>rect:first-child{fill:var(--acento)}
+.tema-btn{flex:none;min-height:44px;padding:0 14px;margin-left:8px;border-radius:999px;border:1px solid var(--control);background:var(--surface);color:var(--text);font-weight:600;font-size:15px}
+.tema-btn:active{background:var(--raised)}
+[data-theme="dark"] .abajo,[data-theme="dark"] .toast{background:var(--superficie-3);color:var(--texto);border:1px solid var(--borde-fuerte)}
+[data-theme="dark"] .abajo span{color:var(--texto-suave)}
+[data-theme="dark"] .srv{border-top-color:var(--aviso-linea)}
+@media (max-width:430px){.barra .marca{flex:1 1 auto;min-width:0}.sync{min-width:0;max-width:90px;overflow:hidden;text-overflow:ellipsis;font-size:12.5px}.tema-btn{padding:0 12px;font-size:14px;margin-left:6px}}
 </style>
+<script>
+/* Los profesores entran desde el Panel del profesor (la puerta del club). La versión pública solo muestra un aviso. */
+window.CLUB_BLOQUEADO=/github\.io$/i.test(location.hostname);
+window.CLUB_PUERTA=location.pathname.indexOf('/tests/')===0;
+window.CLAVE_AUTO='';
+if(window.CLUB_BLOQUEADO)document.write('<style>body>*:not(#aviso-pub){display:none!important}#aviso-pub{display:grid!important}</style>');
+</script>
 </head>
 <body>
+<div id="aviso-pub" hidden style="min-height:100vh;place-content:center;justify-items:center;gap:16px;padding:24px;text-align:center;background:#060A12;color:#F2F5FB;font:18px/1.5 'Instrument Sans',system-ui,'Segoe UI',Arial,sans-serif">
+  <svg width="56" height="56" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#2F6BFF"/><g fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round"><path d="M12 24q6-6 10 0t10 0 10 0 10 0"/><path d="M12 34q6-6 10 0t10 0 10 0 10 0"/><path d="M12 44q6-6 10 0t10 0 10 0 10 0"/></g></svg>
+  <h1 style="margin:0;font:700 28px/1.15 Geist,system-ui,'Segoe UI',Arial,sans-serif">Tests de agua</h1>
+  <p style="margin:0;max-width:30ch;color:#C3CDE2">Ahora se entra desde el Panel del profesor.</p>
+  <a href="https://clubnautico.github.io/" style="display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:0 28px;border-radius:14px;background:#2F6BFF;color:#fff;font-weight:600;text-decoration:none">Ir a la portada</a>
+</div>
 <header class="barra" id="barra"><div class="barra-in">
   <button class="volver" id="btn-volver" type="button" aria-label="Volver" hidden><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg></button>
   <a class="marca" id="btn-inicio" href="#" aria-label="Ir al inicio de Tests de agua"><svg width="28" height="28" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0E7C86"/><path d="M17 13h30v8H36v21h-8V21H17z" fill="#FFFFFF"/><path d="M13 51c4.5-4.5 8.5-4.5 13 0s8.5 4.5 13 0 8.5-4.5 13 0" fill="none" stroke="#FFFFFF" stroke-width="3.6" stroke-linecap="round"/></svg><span id="t-barra">Club Náutico</span></a>
@@ -382,6 +453,7 @@ details.prof .dentro{display:grid;gap:12px;padding:4px 0 var(--pad)}
 <script src="config.js?v=2"></script>
 <script>
 'use strict';
+if(window.CLUB_BLOQUEADO)throw new Error('Tests de agua: la versión pública solo muestra un aviso.');
 let API=(window.CONFIG&&window.CONFIG.api)||'';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -681,7 +753,7 @@ let creado=null,nonceCrear='';
 ['c-fecha','c-prof'].forEach(x=>$(x).addEventListener('input',()=>{nonceCrear=''}));
 $('f-crear').addEventListener('submit',async e=>{
   e.preventDefault();
-  const fecha=$('c-fecha').value,prof=$('c-prof').value.trim(),clave=$('c-clave').value,err=$('c-error');err.hidden=true;
+  const fecha=$('c-fecha').value,prof=$('c-prof').value.trim(),clave=$('c-clave').value||CLAVE_AUTO,err=$('c-error');err.hidden=true;
   if(!fecha||!prof||!clave){err.textContent='Completa la fecha, el profesor y la contraseña.';err.hidden=false;return}
   // El mismo pedido reintentado (se cortó la señal) no crea un test duplicado.
   if(!nonceCrear)nonceCrear=(Date.now().toString(36)+Math.random().toString(36).slice(2,10)).slice(0,20);
@@ -741,14 +813,15 @@ async function cerrarTest(clave){
   try{
     const r=await llamar({accion:'cerrar',id:st.id,juez:cfg.juez,llave:(cfg.llaves||{})[st.id]||'',clave});
     if(r.ok){$('cc-clave').value='';$('t-cc').hidden=true;aplicar(r);aviso('Test cerrado. Ya se puede cargar a la base.')}
+    else if(r.error==='clave'&&!clave&&CLAVE_AUTO){return cerrarTest(CLAVE_AUTO)}
     else if(r.error==='clave'){$('t-cc').hidden=false;if(clave){err.textContent='La contraseña no es correcta.';err.hidden=false}else $('cc-clave').focus()}
     else if(r.error==='bloqueado'){$('t-cc').hidden=false;err.textContent='Demasiados intentos. Espera 15 minutos.';err.hidden=false}
     else aviso('No se pudo cerrar. Inténtalo de nuevo.');
   }catch(e){aviso(errRed(e)||'Sin conexión: el test no se cerró.')}
 }
-$('cc-btn').onclick=()=>{const c=$('cc-clave').value;if(c)cerrarTest(c)};
+$('cc-btn').onclick=()=>{const c=$('cc-clave').value||CLAVE_AUTO;if(c)cerrarTest(c)};
 $('r-btn').onclick=async()=>{
-  const clave=$('r-clave').value,err=$('r-error');err.hidden=true;if(!clave)return;
+  const clave=$('r-clave').value||CLAVE_AUTO,err=$('r-error');err.hidden=true;if(!clave)return;
   try{const r=await llamar({accion:'reabrir',id:st.id,clave,juez:cfg.juez});
     if(r.ok){$('r-clave').value='';aplicar(r);aviso('Test reabierto');if(pendientes())enviar()}
     else{err.textContent=r.error==='clave'?'La contraseña no es correcta.':r.error==='bloqueado'?'Demasiados intentos. Espera 15 minutos.':'No se pudo reabrir.';err.hidden=false}}
@@ -1163,7 +1236,16 @@ async function pidePantalla(){try{if(navigator.wakeLock&&!wake){wake=await navig
     history.replaceState({v},'');ir(v==='inicio'?'test':v,cfg.sid,false);leer();if(pendientes())enviar();pidePantalla();
   }else{cfg.vista='inicio';history.replaceState({v:'inicio'},'');ir('inicio','',false)}
 })();
-if('serviceWorker' in navigator&&window.isSecureContext)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator&&window.isSecureContext&&!CLUB_PUERTA)navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+// Dentro del Panel del profesor la contraseña del club se entrega sola (la puerta la manda solo con tu sesión): no se pide.
+if(CLUB_PUERTA){fetch('/tests-sesion',{cache:'no-store',credentials:'same-origin'}).then(r=>r.ok?r.json():null).then(j=>{
+  if(!j||!j.ok||!j.k)return;CLAVE_AUTO=j.k;
+  document.querySelectorAll('label[for$="-clave"]').forEach(l=>{l.hidden=true;l.style.display='none'});
+  const a=document.querySelector('#f-crear .ayuda');if(a)a.textContent='Se crea el ID con la fecha y tu nombre. Las pruebas y series se arman en la piscina.';
+  const c=document.querySelector('#t-cerrado p');if(c)c.textContent='Este test está cerrado. Para corregir algo, reábrelo.';
+  const d=document.querySelector('#t-cc p');if(d)d.textContent='Toca Cerrar test para cerrarlo.';
+}).catch(()=>{})}
 </script>
 </body>
 </html>
